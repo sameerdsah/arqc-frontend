@@ -27,4 +27,8 @@
 
   <div class="selector-container" *ngIf="selectedTool && !isFunctional">
     <h2>{{ selectedTool === 'cryptogram' ? 'AQRS' : selectedTool!.toUpperCase() }}</h2>
-    <p class="maintenance-text">Under
+    <p class="maintenance-text">Under Maintenance</p>
+    <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
+  </div>
+
+</div>

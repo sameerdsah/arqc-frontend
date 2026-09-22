@@ -39,9 +39,9 @@ export class CryptogramGenerator {
     this.isSubmitting = true;
 
     this.http.post(
-      '/api/save',
-      this.macRequest
-    ).pipe(
+  '/api/save',
+  this.macRequest
+).pipe(
       finalize(() => {
         this.isSubmitting = false;
         this.cdr.detectChanges();
