@@ -5,20 +5,19 @@ import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-arqc-generator',
+  selector: 'app-cryptogram-generator',
   imports: [FormsModule, CommonModule],
-  templateUrl: './arqc-generator.html',
-  styleUrl: './arqc-generator.css'
+  templateUrl: './cryptogram-generator.html',
+  styleUrl: './cryptogram-generator.css'
 })
-export class ArqcGenerator {
+export class CryptogramGenerator {
 
   macRequest = {
     tag9F02: '',
     tag5F2A: '',
     tag9F37: '',
     tag9F36: '',
-    tag9F10: '',
-    key: ''
+    tag9F10: ''
   };
 
   response: any = null;
@@ -39,7 +38,10 @@ export class ArqcGenerator {
     this.error_response = null;
     this.isSubmitting = true;
 
-    this.http.post('http://127.0.0.1:5000/api/save', this.macRequest).pipe(
+    this.http.post(
+      '/api/save',
+      this.macRequest
+    ).pipe(
       finalize(() => {
         this.isSubmitting = false;
         this.cdr.detectChanges();

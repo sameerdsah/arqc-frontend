@@ -1,28 +1,32 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ArqcGenerator } from './arqc-generator/arqc-generator';
+import { CryptogramGenerator } from './cryptogram-generator/cryptogram-generator';
 
 type Network = 'mastercard' | 'visa' | 'discover' | null;
-type DiscoverTool = 'arqc' | 'dcvv' | null;
+type Tool = 'cryptogram' | 'arpc' | 'tc' | 'aac' | null;
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, ArqcGenerator],
+  imports: [CommonModule, CryptogramGenerator],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
-  title = 'arqc-generator';
+  title = 'cryptogram-generator';
 
   selectedNetwork: Network = null;
-  selectedTool: DiscoverTool = null;
+  selectedTool: Tool = null;
+
+  get isFunctional(): boolean {
+    return this.selectedNetwork === 'discover' && this.selectedTool === 'cryptogram';
+  }
 
   selectNetwork(network: Network) {
     this.selectedNetwork = network;
     this.selectedTool = null;
   }
 
-  selectTool(tool: DiscoverTool) {
+  selectTool(tool: Tool) {
     this.selectedTool = tool;
   }
 

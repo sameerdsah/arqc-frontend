@@ -3,29 +3,28 @@
   <div class="selector-container" *ngIf="!selectedNetwork">
     <h1>Select Card Network</h1>
     <div class="network-options">
+      <button class="network-btn" (click)="selectNetwork('discover')">Discover</button>
       <button class="network-btn" (click)="selectNetwork('mastercard')">Mastercard</button>
       <button class="network-btn" (click)="selectNetwork('visa')">Visa</button>
-      <button class="network-btn" (click)="selectNetwork('discover')">Discover</button>
     </div>
   </div>
 
-  <div class="selector-container" *ngIf="selectedNetwork === 'mastercard' || selectedNetwork === 'visa'">
-    <h2>{{ selectedNetwork === 'mastercard' ? 'Mastercard' : 'Visa' }}</h2>
-    <p class="maintenance-text">Under Maintenance</p>
-    <button class="back-btn-bottom" (click)="goBackToNetworks()">&larr; Back</button>
-  </div>
-
-  <div class="selector-container" *ngIf="selectedNetwork === 'discover' && !selectedTool">
-    <h2>Discover</h2>
+  <div class="selector-container" *ngIf="selectedNetwork && !selectedTool">
+    <h2>{{ selectedNetwork === 'mastercard' ? 'Mastercard' : selectedNetwork === 'visa' ? 'Visa' : 'Discover' }}</h2>
     <div class="network-options">
-      <button class="network-btn" (click)="selectTool('arqc')">ARQC Generator</button>
+      <button class="network-btn" (click)="selectTool('cryptogram')">AQRS</button>
+      <button class="network-btn" (click)="selectTool('arpc')">ARPC</button>
+      <button class="network-btn" (click)="selectTool('tc')">TC</button>
+      <button class="network-btn" (click)="selectTool('aac')">AAC</button>
     </div>
     <button class="back-btn-bottom" (click)="goBackToNetworks()">&larr; Back</button>
   </div>
 
-  <div class="arqc-wrapper" *ngIf="selectedNetwork === 'discover' && selectedTool === 'arqc'">
-    <app-arqc-generator></app-arqc-generator>
+  <div class="arqc-wrapper" *ngIf="selectedTool && isFunctional">
+    <app-cryptogram-generator></app-cryptogram-generator>
     <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>
 
-</div>
+  <div class="selector-container" *ngIf="selectedTool && !isFunctional">
+    <h2>{{ selectedTool === 'cryptogram' ? 'AQRS' : selectedTool!.toUpperCase() }}</h2>
+    <p class="maintenance-text">Under

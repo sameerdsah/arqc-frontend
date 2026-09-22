@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ArqcGenerator } from './arqc-generator';
+import { CryptogramGenerator } from './cryptogram-generator';
 
-describe('ArqcGenerator', () => {
-  let component: ArqcGenerator;
-  let fixture: ComponentFixture<ArqcGenerator>;
+describe('CryptogramGenerator', () => {
+  let component: CryptogramGenerator;
+  let fixture: ComponentFixture<CryptogramGenerator>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ArqcGenerator],
+      imports: [CryptogramGenerator],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ArqcGenerator);
+    fixture = TestBed.createComponent(CryptogramGenerator);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

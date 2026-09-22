@@ -1,23 +1,8 @@
-.container {
-  width: 100%;
-  max-width: 480px;
-  box-sizing: border-box;
-  margin: 0 auto;
-  padding: 8px 20px 20px 20px;
-  border-radius: 10px;
-  background: #f8f9fa;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-}
-
 h2 {
   text-align: center;
   margin-top: 0;
   margin-bottom: 20px;
   color: #333;
-}
-
-.form-group {
-  margin-bottom: 15px;
 }
 
 label {
@@ -79,6 +64,13 @@ button:disabled {
   margin: 0;
 }
 
+.crypto-value {
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 1px;
+  font-size: 1.05rem;
+  color: #0d47a1;
+}
+
 .btn-disabled-look {
   background: #cfcfcf;
   color: #888;
@@ -87,4 +79,12 @@ button:disabled {
 
 .btn-disabled-look:hover {
   background: #cfcfcf;
+}
+
+.form-group {
+  margin-bottom: 10px;  /* was 15px */
+}
+
+.container {
+  padding: 6px 20px 15px 20px;  /* was 8px 20px 20px 20px */
 }
