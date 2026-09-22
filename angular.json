@@ -2,11 +2,12 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": "a0c40d0f-0e48-4f07-88d6-5d51cccddc27"
   },
   "newProjectRoot": "projects",
   "projects": {
-    "employee-ui": {
+    "arqc-generator": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -64,10 +65,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "employee-ui:build:production"
+              "buildTarget": "arqc-generator:build:production"
             },
             "development": {
-              "buildTarget": "employee-ui:build:development"
+              "buildTarget": "arqc-generator:build:development"
             }
           },
           "defaultConfiguration": "development"
