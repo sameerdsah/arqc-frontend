@@ -10,9 +10,8 @@ pipeline {
                stage('Unit Tests') {
             steps {
                 sh '''
-                    export CHROME_BIN=$(which chromium)
                     npm install
-                    npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox
+                    npm run test -- --watch=false
                 '''
             }
         }
