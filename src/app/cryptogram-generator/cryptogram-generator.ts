@@ -16,12 +16,12 @@ export class CryptogramGenerator {
   @Input() apiUrl = '/api/save';
   @Input() resultPrefix = 'The computed ARQC is:';
 
-  macRequest = {
-    tag9F02: '',
-    tag5F2A: '',
-    tag9F37: '',
-    tag9F36: '',
-    tag9F10: ''
+    macRequest = {
+    tag_9f02: '',
+    tag_5f2a: '',
+    tag_9f37: '',
+    tag_9f36: '',
+    tag_9f10: ''
   };
 
   response: any = null;

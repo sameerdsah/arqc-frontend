@@ -5,7 +5,7 @@
 
     <div class="form-group">
       <label for="tag9F02">Tag 9F02 (Amount, Authorized) *</label>
-      <input type="text" id="tag9F02" name="tag9F02" [(ngModel)]="macRequest.tag9F02" #tag9F02="ngModel" required pattern="^[0-9A-Za-z]{12}$">
+      <input type="text" id="tag9F02" name="tag9F02" [(ngModel)]="macRequest.tag_9f02" #tag9F02="ngModel" required pattern="^[0-9A-Za-z]{12}$">
       <div class="error" *ngIf="tag9F02.invalid && (tag9F02.dirty || macForm.submitted)">
         <span *ngIf="tag9F02.errors?.['required']">This field is required</span>
         <span *ngIf="tag9F02.errors?.['pattern']">Please enter a valid amount</span>
@@ -14,7 +14,7 @@
 
     <div class="form-group">
       <label for="tag5F2A">Tag 5F2A (Currency Code) *</label>
-      <input type="text" id="tag5F2A" name="tag5F2A" [(ngModel)]="macRequest.tag5F2A" #tag5F2A="ngModel" required pattern="^[0-9A-Za-z]{4}$">
+      <input type="text" id="tag5F2A" name="tag5F2A" [(ngModel)]="macRequest.tag_5f2a" #tag5F2A="ngModel" required pattern="^[0-9A-Za-z]{4}$">
       <div class="error" *ngIf="tag5F2A.invalid && (tag5F2A.dirty || macForm.submitted)">
         <span *ngIf="tag5F2A.errors?.['required']">This field is required</span>
         <span *ngIf="tag5F2A.errors?.['pattern']">Please enter a valid currency code</span>
@@ -23,7 +23,7 @@
 
     <div class="form-group">
       <label for="tag9F37">Tag 9F37 (Unpredictable Number) *</label>
-      <input type="text" id="tag9F37" name="tag9F37" [(ngModel)]="macRequest.tag9F37" #tag9F37="ngModel" required pattern="^[0-9A-Za-z]{8}$">
+      <input type="text" id="tag9F37" name="tag9F37" [(ngModel)]="macRequest.tag_9f37" #tag9F37="ngModel" required pattern="^[0-9A-Za-z]{8}$">
       <div class="error" *ngIf="tag9F37.invalid && (tag9F37.dirty || macForm.submitted)">
         <span *ngIf="tag9F37.errors?.['required']">This field is required</span>
         <span *ngIf="tag9F37.errors?.['pattern']">Please enter a valid unpredictable number</span>
@@ -32,7 +32,7 @@
 
     <div class="form-group">
       <label for="tag9F36">Tag 9F36 (Application Transaction Counter) *</label>
-      <input type="text" id="tag9F36" name="tag9F36" [(ngModel)]="macRequest.tag9F36" #tag9F36="ngModel" required pattern="^[0-9A-Za-z]{4}$">
+      <input type="text" id="tag9F36" name="tag9F36" [(ngModel)]="macRequest.tag_9f36" #tag9F36="ngModel" required pattern="^[0-9A-Za-z]{4}$">
       <div class="error" *ngIf="tag9F36.invalid && (tag9F36.dirty || macForm.submitted)">
         <span *ngIf="tag9F36.errors?.['required']">This field is required</span>
         <span *ngIf="tag9F36.errors?.['pattern']">Please enter a valid transaction counter</span>
@@ -41,7 +41,7 @@
 
     <div class="form-group">
       <label for="tag9F10">Tag 9F10 (Issuer Application Data) *</label>
-      <input type="text" id="tag9F10" name="tag9F10" [(ngModel)]="macRequest.tag9F10" #tag9F10="ngModel" required pattern="^[0-9A-Za-z]{20,}$">
+      <input type="text" id="tag9F10" name="tag9F10" [(ngModel)]="macRequest.tag_9f10" #tag9F10="ngModel" required pattern="^[0-9A-Za-z]{20,}$">
       <div class="error" *ngIf="tag9F10.invalid && (tag9F10.dirty || macForm.submitted)">
         <span *ngIf="tag9F10.errors?.['required']">This field is required</span>
         <span *ngIf="tag9F10.errors?.['pattern']">Please enter valid issuer application data</span>
