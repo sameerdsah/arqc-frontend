@@ -7,15 +7,12 @@ pipeline {
         ECR_REPO = '783582067637.dkr.ecr.eu-north-1.amazonaws.com/arqc-frontend'
     }
     stages {
-        stage('Unit Tests') {
+               stage('Unit Tests') {
             steps {
                 sh '''
-                    docker run --rm -v $(pwd):/app -w /app node:24-alpine sh -c "
-                        apk add --no-cache chromium &&
-                        export CHROME_BIN=/usr/bin/chromium-browser &&
-                        npm install &&
-                        npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox
-                    "
+                    export CHROME_BIN=$(which chromium)
+                    npm install
+                    npm run test -- --watch=false --browsers=ChromeHeadlessNoSandbox
                 '''
             }
         }
