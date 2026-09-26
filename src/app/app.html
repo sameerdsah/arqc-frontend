@@ -21,7 +21,17 @@
   </div>
 
   <div class="arqc-wrapper" *ngIf="isStandardCryptogramFunctional">
-    <app-arqc-generator [apiUrl]="toolApiUrl" [resultPrefix]="toolResultPrefix" [title]="toolTitle"></app-arqc-generator>
+    <app-arqc-generator></app-arqc-generator>
+    <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
+  </div>
+
+  <div class="arqc-wrapper" *ngIf="isTcFunctional">
+    <app-tc-generator></app-tc-generator>
+    <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
+  </div>
+
+  <div class="arqc-wrapper" *ngIf="isAacFunctional">
+    <app-aac-generator></app-aac-generator>
     <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>
 

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef, Input } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -12,9 +12,10 @@ import { finalize } from 'rxjs/operators';
 })
 export class ArqcGenerator {
 
-  @Input() title = 'ARQC Generator';
-  @Input() apiUrl = '/api/save';
-  @Input() resultPrefix = 'The computed ARQC is:';
+  title = 'ARQC Generator';
+  subtitle = 'Authorisation Request \u2014 Cryptogram sent to the issuer for approval';
+  apiUrl = '/api/save';
+  resultPrefix = 'The computed ARQC is:';
 
     macRequest = {
     tag_9f02: '',

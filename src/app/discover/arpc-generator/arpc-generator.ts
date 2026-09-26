@@ -1,30 +1,55 @@
-import { Component, inject } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Component, ChangeDetectorRef } from '@angular/core';
+import { FormsModule, NgForm } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-arpc-generator',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [FormsModule, CommonModule],
   templateUrl: './arpc-generator.html',
   styleUrl: './arpc-generator.css'
 })
 export class ArpcGenerator {
-  private fb = inject(FormBuilder);
 
-  form = this.fb.nonNullable.group({
-    arqc: ['', [Validators.required, Validators.pattern(/^[0-9A-Fa-f]{16}$/)]], // 9F26
-    arc:  ['', [Validators.required, Validators.pattern(/^[0-9A-Fa-f]{4}$/)]]   // 8A
-  });
+  subtitle = 'Authorisation Response \u2014 Issuer\'s reply to the card';
 
-  result = '';
+  arpcRequest = {
+    arqc: '',
+    arc: ''
+  };
 
-  onSubmit(): void {
-    if (this.form.invalid) {
+  response: any = null;
+  isSubmitting = false;
+  isError = false;
+
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+
+  submitForm(form: NgForm) {
+    if (form.invalid) {
+      form.control.markAllAsTouched();
       return;
     }
-    const { arqc, arc } = this.form.getRawValue();
 
-    // TODO: replace with your ARPC calculation or backend call
-    this.result = `ARQC: ${arqc.toUpperCase()} | ARC: ${arc.toUpperCase()}`;
+    this.response = null;
+    this.isError = false;
+    this.isSubmitting = true;
+
+    this.http.post('/api/arpc', this.arpcRequest).pipe(
+      finalize(() => {
+        this.isSubmitting = false;
+        this.cdr.detectChanges();
+      })
+    ).subscribe({
+      next: (data) => {
+        this.response = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Backend error:', err);
+        this.isError = true;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

@@ -10,3 +10,10 @@ html, body {
   height: 100%;
   overflow-x: hidden;
 }
+
+.subtitle {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin: -10px 0 16px;
+}

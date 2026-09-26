@@ -1,33 +1,84 @@
-<div class="card">
-  <h1>TC Generator</h1>
+<div class="container">
+  <h2>{{ title }}</h2>
+  <p class="subtitle" *ngIf="subtitle">{{ subtitle }}</p>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-    <label for="amount">Tag 9F02 (Amount, Authorized) *</label>
-    <input type="text" id="amount" formControlName="amount"
-           placeholder="12 digits" maxlength="12" autocomplete="off">
+  <form #tcForm="ngForm" (ngSubmit)="submitForm(tcForm)">
 
-    <label for="currency">Tag 5F2A (Currency Code) *</label>
-    <input type="text" id="currency" formControlName="currency"
-           placeholder="4 digits" maxlength="4" autocomplete="off">
+    <div class="form-group">
+      <label for="tag8A">Tag 8A (Authorisation Response Code) *</label>
+      <input type="text" id="tag8A" name="tag8A" [(ngModel)]="tcRequest.tag_8a" #tag8A="ngModel" required pattern="^[0-9A-Fa-f]{4}$">
+      <div class="error" *ngIf="tag8A.invalid && (tag8A.dirty || tcForm.submitted)">
+        <span *ngIf="tag8A.errors?.['required']">This field is required</span>
+        <span *ngIf="tag8A.errors?.['pattern']">Enter 4 hex characters (e.g. 3030 = "00" approved)</span>
+      </div>
+    </div>
 
-    <label for="un">Tag 9F37 (Unpredictable Number) *</label>
-    <input type="text" id="un" formControlName="un"
-           placeholder="8 hex characters" maxlength="8" autocomplete="off">
+    <div class="form-group">
+      <label for="tag9F02">Tag 9F02 (Amount, Authorized) *</label>
+      <input type="text" id="tag9F02" name="tag9F02" [(ngModel)]="tcRequest.tag_9f02" #tag9F02="ngModel" required pattern="^[0-9A-Fa-f]{12}$">
+      <div class="error" *ngIf="tag9F02.invalid && (tag9F02.dirty || tcForm.submitted)">
+        <span *ngIf="tag9F02.errors?.['required']">This field is required</span>
+        <span *ngIf="tag9F02.errors?.['pattern']">Please enter a valid amount</span>
+      </div>
+    </div>
 
-    <label for="atc">Tag 9F36 (Application Transaction Counter) *</label>
-    <input type="text" id="atc" formControlName="atc"
-           placeholder="4 hex characters" maxlength="4" autocomplete="off">
+    <div class="form-group">
+      <label for="tag5F2A">Tag 5F2A (Currency Code) *</label>
+      <input type="text" id="tag5F2A" name="tag5F2A" [(ngModel)]="tcRequest.tag_5f2a" #tag5F2A="ngModel" required pattern="^[0-9A-Fa-f]{4}$">
+      <div class="error" *ngIf="tag5F2A.invalid && (tag5F2A.dirty || tcForm.submitted)">
+        <span *ngIf="tag5F2A.errors?.['required']">This field is required</span>
+        <span *ngIf="tag5F2A.errors?.['pattern']">Please enter a valid currency code</span>
+      </div>
+    </div>
 
-    <label for="iad">Tag 9F10 (Issuer Application Data) *</label>
-    <input type="text" id="iad" formControlName="iad"
-           placeholder="Up to 64 hex characters" maxlength="64" autocomplete="off">
+    <div class="form-group">
+      <label for="tag9F37">Tag 9F37 (Unpredictable Number) *</label>
+      <input type="text" id="tag9F37" name="tag9F37" [(ngModel)]="tcRequest.tag_9f37" #tag9F37="ngModel" required pattern="^[0-9A-Fa-f]{8}$">
+      <div class="error" *ngIf="tag9F37.invalid && (tag9F37.dirty || tcForm.submitted)">
+        <span *ngIf="tag9F37.errors?.['required']">This field is required</span>
+        <span *ngIf="tag9F37.errors?.['pattern']">Please enter a valid unpredictable number</span>
+      </div>
+    </div>
 
-    <button type="submit" [disabled]="form.invalid">Submit</button>
+    <div class="form-group">
+      <label for="tag9F36">Tag 9F36 (Application Transaction Counter) *</label>
+      <input type="text" id="tag9F36" name="tag9F36" [(ngModel)]="tcRequest.tag_9f36" #tag9F36="ngModel" required pattern="^[0-9A-Fa-f]{4}$">
+      <div class="error" *ngIf="tag9F36.invalid && (tag9F36.dirty || tcForm.submitted)">
+        <span *ngIf="tag9F36.errors?.['required']">This field is required</span>
+        <span *ngIf="tag9F36.errors?.['pattern']">Please enter a valid transaction counter</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="tag9F10">Tag 9F10 (Issuer Application Data) *</label>
+      <input type="text" id="tag9F10" name="tag9F10" [(ngModel)]="tcRequest.tag_9f10" #tag9F10="ngModel" required pattern="^[0-9A-Fa-f]{20,}$">
+      <div class="error" *ngIf="tag9F10.invalid && (tag9F10.dirty || tcForm.submitted)">
+        <span *ngIf="tag9F10.errors?.['required']">This field is required</span>
+        <span *ngIf="tag9F10.errors?.['pattern']">Please enter valid issuer application data</span>
+      </div>
+    </div>
+
+    <button
+      type="submit"
+      [disabled]="isSubmitting"
+      [class.btn-disabled-look]="tcForm.invalid || isSubmitting"
+    >
+      {{ isSubmitting ? 'Calculating...' : 'Submit' }}
+    </button>
+
   </form>
 
-  @if (result) {
-    <div class="result">{{ result }}</div>
-  }
-</div>
+  <div class="response" *ngIf="response || isError">
+    <p *ngIf="!isError && response?.result">
+      {{ resultPrefix }} <strong class="crypto-value">{{ response.result }}</strong>
+    </p>
+    <p *ngIf="!isError && response?.cid" class="cid">
+      Tag 9F27 (Cryptogram Information Data): <strong class="crypto-value">{{ response.cid }}</strong>
+    </p>
+    <p *ngIf="isError" class="response-error">
+      <strong>Unable to calculate the TC</strong><br>
+      <small>{{ error_response }}</small>
+    </p>
+  </div>
 
-<a routerLink="/discover" class="back">&larr; Back</a>
+</div>
