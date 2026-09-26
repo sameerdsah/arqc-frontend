@@ -1,0 +1,33 @@
+<div class="card">
+  <h1>AAC Generator</h1>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <label for="amount">Tag 9F02 (Amount, Authorized) *</label>
+    <input type="text" id="amount" formControlName="amount"
+           placeholder="12 digits" maxlength="12" autocomplete="off">
+
+    <label for="currency">Tag 5F2A (Currency Code) *</label>
+    <input type="text" id="currency" formControlName="currency"
+           placeholder="4 digits" maxlength="4" autocomplete="off">
+
+    <label for="un">Tag 9F37 (Unpredictable Number) *</label>
+    <input type="text" id="un" formControlName="un"
+           placeholder="8 hex characters" maxlength="8" autocomplete="off">
+
+    <label for="atc">Tag 9F36 (Application Transaction Counter) *</label>
+    <input type="text" id="atc" formControlName="atc"
+           placeholder="4 hex characters" maxlength="4" autocomplete="off">
+
+    <label for="iad">Tag 9F10 (Issuer Application Data) *</label>
+    <input type="text" id="iad" formControlName="iad"
+           placeholder="Up to 64 hex characters" maxlength="64" autocomplete="off">
+
+    <button type="submit" [disabled]="form.invalid">Submit</button>
+  </form>
+
+  @if (result) {
+    <div class="result">{{ result }}</div>
+  }
+</div>
+
+<a routerLink="/discover" class="back">&larr; Back</a>

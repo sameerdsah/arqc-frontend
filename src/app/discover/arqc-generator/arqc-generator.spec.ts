@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
-import { CryptogramGenerator } from './cryptogram-generator';
+import { ArqcGenerator } from './arqc-generator';
 
-describe('CryptogramGenerator', () => {
-  let component: CryptogramGenerator;
-  let fixture: ComponentFixture<CryptogramGenerator>;
+describe('ArqcGenerator', () => {
+  let component: ArqcGenerator;
+  let fixture: ComponentFixture<ArqcGenerator>;
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CryptogramGenerator, HttpClientTestingModule],
+      imports: [ArqcGenerator, HttpClientTestingModule],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(CryptogramGenerator);
+    fixture = TestBed.createComponent(ArqcGenerator);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();

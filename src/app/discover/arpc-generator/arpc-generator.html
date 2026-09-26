@@ -1,0 +1,21 @@
+<div class="card">
+  <h1>ARPC Generator</h1>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <label for="arqc">Tag 9F26 (Application Cryptogram) *</label>
+    <input type="text" id="arqc" formControlName="arqc"
+           placeholder="16 hex characters" maxlength="16" autocomplete="off">
+
+    <label for="arc">Tag 8A (Authorization Response Code) *</label>
+    <input type="text" id="arc" formControlName="arc"
+           placeholder="4 hex characters" maxlength="4" autocomplete="off">
+
+    <button type="submit" [disabled]="form.invalid">Submit</button>
+  </form>
+
+  @if (result) {
+    <div class="result">{{ result }}</div>
+  }
+</div>
+
+<a routerLink="/discover" class="back">&larr; Back</a>

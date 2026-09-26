@@ -21,7 +21,7 @@
   </div>
 
   <div class="arqc-wrapper" *ngIf="isStandardCryptogramFunctional">
-    <app-cryptogram-generator [apiUrl]="toolApiUrl" [resultPrefix]="toolResultPrefix" [title]="toolTitle"></app-cryptogram-generator>
+    <app-arqc-generator [apiUrl]="toolApiUrl" [resultPrefix]="toolResultPrefix" [title]="toolTitle"></app-arqc-generator>
     <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>
 

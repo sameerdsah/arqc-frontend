@@ -5,12 +5,12 @@ import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-cryptogram-generator',
+  selector: 'app-arqc-generator',
   imports: [FormsModule, CommonModule],
-  templateUrl: './cryptogram-generator.html',
-  styleUrl: './cryptogram-generator.css'
+  templateUrl: './arqc-generator.html',
+  styleUrl: './arqc-generator.css'
 })
-export class CryptogramGenerator {
+export class ArqcGenerator {
 
   @Input() title = 'ARQC Generator';
   @Input() apiUrl = '/api/save';

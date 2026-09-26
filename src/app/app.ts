@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CryptogramGenerator } from './cryptogram-generator/cryptogram-generator';
-import { ArpcGenerator } from './arpc-generator/arpc-generator';
+import { ArqcGenerator } from './discover/arqc-generator/arqc-generator';
+import { ArpcGenerator } from './discover/arpc-generator/arpc-generator';
 
 type Network = 'mastercard' | 'visa' | 'discover' | null;
 type Tool = 'cryptogram' | 'arpc' | 'tc' | 'aac' | null;
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, CryptogramGenerator, ArpcGenerator],
+  imports: [CommonModule, ArqcGenerator, ArpcGenerator],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
