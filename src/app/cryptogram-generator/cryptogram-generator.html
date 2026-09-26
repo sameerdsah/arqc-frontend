@@ -1,5 +1,5 @@
 <div class="container">
-  <h2>Cryptogram Generator</h2>
+  <h2>{{ title }}</h2>
 
   <form #macForm="ngForm" (ngSubmit)="submitForm(macForm)">
 
@@ -60,10 +60,10 @@
 
   <div class="response" *ngIf="response || isError">
     <p *ngIf="!isError && response?.result">
-      The computed Cryptogram is: <strong class="crypto-value">{{ response.result }}</strong>
+      {{ resultPrefix }} <strong class="crypto-value">{{ response.result }}</strong>
     </p>
     <p *ngIf="isError" class="response-error">
-      <strong>Unable to calculate the Cryptogram</strong>
+      <strong>Unable to calculate the cryptogram</strong>
     </p>
   </div>
 

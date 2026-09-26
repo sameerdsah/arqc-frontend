@@ -1,0 +1,97 @@
+.container {
+  width: 100%;
+  max-width: 480px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 8px 20px 20px 20px;
+  border-radius: 10px;
+  background: #f8f9fa;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+h2 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cfcfcf;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+input:focus {
+  outline: none;
+  border-color: #1976d2;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+button:hover {
+  background: #0d5bbc;
+}
+
+button:disabled {
+  background: gray;
+  cursor: not-allowed;
+}
+
+.error {
+  color: red;
+  font-size: 12px;
+}
+
+.response {
+  margin-top: 20px;
+}
+
+.response-error {
+  color: red;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.response p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.crypto-value {
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 1px;
+  font-size: 1.05rem;
+  color: #0d47a1;
+}
+
+.btn-disabled-look {
+  background: #cfcfcf;
+  color: #888;
+  cursor: not-allowed;
+}
+
+.btn-disabled-look:hover {
+  background: #cfcfcf;
+}

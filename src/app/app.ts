@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CryptogramGenerator } from './cryptogram-generator/cryptogram-generator';
+import { ArpcGenerator } from './arpc-generator/arpc-generator';
 
 type Network = 'mastercard' | 'visa' | 'discover' | null;
 type Tool = 'cryptogram' | 'arpc' | 'tc' | 'aac' | null;
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, CryptogramGenerator],
+  imports: [CommonModule, CryptogramGenerator, ArpcGenerator],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -17,8 +18,41 @@ export class App {
   selectedNetwork: Network = null;
   selectedTool: Tool = null;
 
+  get isStandardCryptogramFunctional(): boolean {
+    return this.selectedNetwork === 'discover' &&
+      (this.selectedTool === 'cryptogram' || this.selectedTool === 'tc' || this.selectedTool === 'aac');
+  }
+
+  get isArpcFunctional(): boolean {
+    return this.selectedNetwork === 'discover' && this.selectedTool === 'arpc';
+  }
+
   get isFunctional(): boolean {
-    return this.selectedNetwork === 'discover' && this.selectedTool === 'cryptogram';
+    return this.isStandardCryptogramFunctional || this.isArpcFunctional;
+  }
+
+  get toolApiUrl(): string {
+    switch (this.selectedTool) {
+      case 'tc': return '/api/tc';
+      case 'aac': return '/api/aac';
+      default: return '/api/save';
+    }
+  }
+
+  get toolResultPrefix(): string {
+    switch (this.selectedTool) {
+      case 'tc': return 'The computed TC is:';
+      case 'aac': return 'The computed AAC is:';
+      default: return 'The computed ARQC is:';
+    }
+  }
+
+  get toolTitle(): string {
+    switch (this.selectedTool) {
+      case 'tc': return 'TC Generator';
+      case 'aac': return 'AAC Generator';
+      default: return 'ARQC Generator';
+    }
   }
 
   selectNetwork(network: Network) {

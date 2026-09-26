@@ -1,0 +1,43 @@
+<div class="container">
+  <h2>ARPC Generator</h2>
+
+  <form #arpcForm="ngForm" (ngSubmit)="submitForm(arpcForm)">
+
+    <div class="form-group">
+      <label for="arqc">ARQC (16 hex chars) *</label>
+      <input type="text" id="arqc" name="arqc" [(ngModel)]="arpcRequest.arqc" #arqc="ngModel" required pattern="^[0-9A-Za-z]{16}$">
+      <div class="error" *ngIf="arqc.invalid && (arqc.dirty || arpcForm.submitted)">
+        <span *ngIf="arqc.errors?.['required']">This field is required</span>
+        <span *ngIf="arqc.errors?.['pattern']">Please enter a valid ARQC value</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="arc">Authorization Response Code (4 hex chars) *</label>
+      <input type="text" id="arc" name="arc" [(ngModel)]="arpcRequest.arc" #arc="ngModel" required pattern="^[0-9A-Za-z]{4}$">
+      <div class="error" *ngIf="arc.invalid && (arc.dirty || arpcForm.submitted)">
+        <span *ngIf="arc.errors?.['required']">This field is required</span>
+        <span *ngIf="arc.errors?.['pattern']">Please enter a valid response code</span>
+      </div>
+    </div>
+
+    <button
+      type="submit"
+      [disabled]="isSubmitting"
+      [class.btn-disabled-look]="arpcForm.invalid || isSubmitting"
+    >
+      {{ isSubmitting ? 'Calculating...' : 'Submit' }}
+    </button>
+
+  </form>
+
+  <div class="response" *ngIf="response || isError">
+    <p *ngIf="!isError && response?.result">
+      The computed ARPC is: <strong class="crypto-value">{{ response.result }}</strong>
+    </p>
+    <p *ngIf="isError" class="response-error">
+      <strong>Unable to calculate the ARPC</strong>
+    </p>
+  </div>
+
+</div>
