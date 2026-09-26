@@ -23,6 +23,12 @@ describe('CryptogramGenerator', () => {
     httpMock.verify();
   });
 
+  function setInputValue(selector: string, value: string) {
+    const input: HTMLInputElement = fixture.debugElement.query(By.css(selector)).nativeElement;
+    input.value = value;
+    input.dispatchEvent(new Event('input'));
+  }
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -34,22 +40,23 @@ describe('CryptogramGenerator', () => {
     httpMock.expectNone('/api/save');
   });
 
-  it('should show a required error for tag9F02 once touched and left empty', () => {
-    const input: HTMLInputElement = fixture.debugElement.query(By.css('#tag9F02')).nativeElement;
-    input.dispatchEvent(new Event('focus'));
-    input.dispatchEvent(new Event('blur'));
+  it('should show a required error for tag9F02 once touched and left empty', async () => {
+    setInputValue('#tag9F02', '1');
+    setInputValue('#tag9F02', '');
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('This field is required');
   });
 
-  it('should send a POST to /api/save with valid input and handle the response', () => {
-    component.macRequest = {
-      tag9F02: '000000010000',
-      tag5F2A: '0978',
-      tag9F37: '12345678',
-      tag9F36: '0001',
-      tag9F10: '06150102030405060708'
-    };
+  it('should send a POST to /api/save with valid input and handle the response', async () => {
+    setInputValue('#tag9F02', '000000010000');
+    setInputValue('#tag5F2A', '0978');
+    setInputValue('#tag9F37', '12345678');
+    setInputValue('#tag9F36', '0001');
+    setInputValue('#tag9F10', '06150102030405060708');
+    fixture.detectChanges();
+    await fixture.whenStable();
     fixture.detectChanges();
 
     const form = fixture.debugElement.query(By.css('form')).nativeElement;
@@ -61,6 +68,7 @@ describe('CryptogramGenerator', () => {
     req.flush({ result: '37858601E2285A5D' });
 
     fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.response.result).toBe('37858601E2285A5D');
   });
 });
