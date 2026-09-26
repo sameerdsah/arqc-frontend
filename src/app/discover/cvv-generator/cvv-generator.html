@@ -1,0 +1,52 @@
+<div class="container">
+  <h2>{{ title }}</h2>
+  <p class="subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+
+  <form #cvvForm="ngForm" (ngSubmit)="submitForm(cvvForm)">
+
+    <div class="form-group">
+      <label for="pan">Tag 5A (PAN) *</label>
+      <input type="text" id="pan" name="pan" [(ngModel)]="cvvRequest.pan" #pan="ngModel" required pattern="^[0-9]{13,19}$">
+      <div class="error" *ngIf="pan.invalid && (pan.dirty || cvvForm.submitted)">
+        <span *ngIf="pan.errors?.['required']">This field is required</span>
+        <span *ngIf="pan.errors?.['pattern']">Please enter a valid PAN</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="expiry">Expiry Date (YYMM) *</label>
+      <input type="text" id="expiry" name="expiry" [(ngModel)]="cvvRequest.expiry" #expiry="ngModel" required pattern="^[0-9]{2}(0[1-9]|1[0-2])$">
+      <div class="error" *ngIf="expiry.invalid && (expiry.dirty || cvvForm.submitted)">
+        <span *ngIf="expiry.errors?.['required']">This field is required</span>
+        <span *ngIf="expiry.errors?.['pattern']">Please enter a valid expiry date</span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="serviceCode">Tag 5F30 (Service Code) *</label>
+      <input type="text" id="serviceCode" name="serviceCode" [(ngModel)]="cvvRequest.service_code" #serviceCode="ngModel" required pattern="^[0-9]{3}$">
+      <div class="error" *ngIf="serviceCode.invalid && (serviceCode.dirty || cvvForm.submitted)">
+        <span *ngIf="serviceCode.errors?.['required']">This field is required</span>
+        <span *ngIf="serviceCode.errors?.['pattern']">Please enter a valid service code</span>
+      </div>
+    </div>
+
+    <button
+      type="submit"
+      [disabled]="isSubmitting"
+      [class.btn-disabled-look]="cvvForm.invalid || isSubmitting"
+    >
+      {{ isSubmitting ? 'Calculating...' : 'Submit' }}
+    </button>
+
+  </form>
+
+  <div class="response" *ngIf="response || isError">
+    <p *ngIf="!isError && response?.result">
+      {{ resultPrefix }} <strong class="crypto-value">{{ response.result }}</strong>
+    </p>
+    <p *ngIf="isError" class="response-error">
+      <strong>Unable to calculate the CVV</strong><br>
+      <small>{{ error_response }}</small>
+    </p>
+  </div>
+
+</div>

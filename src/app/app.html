@@ -12,36 +12,33 @@
   <div class="selector-container" *ngIf="selectedNetwork && !selectedTool">
     <h2>{{ selectedNetwork === 'mastercard' ? 'Mastercard' : selectedNetwork === 'visa' ? 'Visa' : 'Discover' }}</h2>
     <div class="network-options">
-      <button class="network-btn" (click)="selectTool('cryptogram')">ARQC</button>
-      <button class="network-btn" (click)="selectTool('arpc')">ARPC</button>
-      <button class="network-btn" (click)="selectTool('tc')">TC</button>
-      <button class="network-btn" (click)="selectTool('aac')">AAC</button>
+      <button class="network-btn" *ngFor="let tool of tools" (click)="selectTool(tool)">{{ toolLabels[tool!] }}</button>
     </div>
     <button class="back-btn-bottom" (click)="goBackToNetworks()">&larr; Back</button>
   </div>
 
-  <div class="arqc-wrapper" *ngIf="isStandardCryptogramFunctional">
+  <div class="arqc-wrapper" *ngIf="isArqcFunctional">
     <app-arqc-generator></app-arqc-generator>
     <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>
 
-  <div class="arqc-wrapper" *ngIf="isTcFunctional">
-    <app-tc-generator></app-tc-generator>
+  <div class="arqc-wrapper" *ngIf="isCvvFunctional">
+    <app-cvv-generator></app-cvv-generator>
     <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>
 
-  <div class="arqc-wrapper" *ngIf="isAacFunctional">
-    <app-aac-generator></app-aac-generator>
+  <div class="arqc-wrapper" *ngIf="isIcvvFunctional">
+    <app-icvv-generator></app-icvv-generator>
     <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>
 
-  <div class="arqc-wrapper" *ngIf="isArpcFunctional">
-    <app-arpc-generator></app-arpc-generator>
+  <div class="arqc-wrapper" *ngIf="isDcvvFunctional">
+    <app-dcvv-generator></app-dcvv-generator>
     <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>
 
   <div class="selector-container" *ngIf="selectedTool && !isFunctional">
-    <h2>{{ selectedTool === 'cryptogram' ? 'ARQC' : selectedTool!.toUpperCase() }}</h2>
+    <h2>{{ selectedToolLabel }}</h2>
     <p class="maintenance-text">Under Maintenance</p>
     <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>

@@ -37,10 +37,10 @@ describe('ArqcGenerator', () => {
     const form = fixture.debugElement.query(By.css('form')).nativeElement;
     form.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
-    httpMock.expectNone('/api/save');
+    httpMock.expectNone('/api/arqc');
   });
 
-  it('should show a required error for tag9F02 once touched and left empty', async () => {
+  it('should show a required error once a field is touched and left empty', async () => {
     setInputValue('#tag9F02', '1');
     setInputValue('#tag9F02', '');
     fixture.detectChanges();
@@ -49,7 +49,7 @@ describe('ArqcGenerator', () => {
     expect(fixture.nativeElement.textContent).toContain('This field is required');
   });
 
-  it('should send a POST to /api/save with valid input and handle the response', async () => {
+  it('should send a POST to /api/arqc with valid input and handle the response', async () => {
     setInputValue('#tag9F02', '000000010000');
     setInputValue('#tag5F2A', '0978');
     setInputValue('#tag9F37', '12345678');
@@ -63,8 +63,9 @@ describe('ArqcGenerator', () => {
     form.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
 
-    const req = httpMock.expectOne('/api/save');
+    const req = httpMock.expectOne('/api/arqc');
     expect(req.request.method).toBe('POST');
+    expect(req.request.body.tag_9f02).toBe('000000010000');
     req.flush({ result: '37858601E2285A5D' });
 
     fixture.detectChanges();

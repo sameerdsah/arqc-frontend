@@ -5,27 +5,21 @@ import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-tc-generator',
+  selector: 'app-icvv-generator',
   imports: [FormsModule, CommonModule],
-  templateUrl: './tc-generator.html',
-  styleUrl: './tc-generator.css'
+  templateUrl: './icvv-generator.html',
+  styleUrl: './icvv-generator.css'
 })
-export class TcGenerator {
+export class IcvvGenerator {
 
-  title = 'TC Generator';
-  subtitle = 'Transaction Certificate \u2014 Issued after the issuer approves';
-  apiUrl = '/api/tc';
-  resultPrefix = 'The computed TC is:';
+  title = 'iCVV Generator';
+  subtitle = 'Integrated Card Verification Value (stored in the chip)';
+  apiUrl = '/api/icvv';
+  resultPrefix = 'The computed iCVV is:';
 
-  // CDOL2-style data for the 2nd GENERATE AC: the issuer's response code (8A)
-  // plus the same transaction data that was used for the ARQC.
-  tcRequest = {
-    tag_8a: '',
-    tag_9f02: '',
-    tag_5f2a: '',
-    tag_9f37: '',
-    tag_9f36: '',
-    tag_9f10: ''
+  icvvRequest = {
+    pan: '',
+    expiry: ''
   };
 
   response: any = null;
@@ -46,7 +40,7 @@ export class TcGenerator {
     this.error_response = null;
     this.isSubmitting = true;
 
-    this.http.post(this.apiUrl, this.tcRequest).pipe(
+    this.http.post(this.apiUrl, this.icvvRequest).pipe(
       finalize(() => {
         this.isSubmitting = false;
         this.cdr.detectChanges();

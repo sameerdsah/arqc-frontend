@@ -4,37 +4,32 @@ import { Router, NavigationEnd } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
 import { ArqcGenerator } from './discover/arqc-generator/arqc-generator';
-import { ArpcGenerator } from './discover/arpc-generator/arpc-generator';
-import { TcGenerator } from './discover/tc-generator/tc-generator';
-import { AacGenerator } from './discover/aac-generator/aac-generator';
+import { CvvGenerator } from './discover/cvv-generator/cvv-generator';
+import { IcvvGenerator } from './discover/icvv-generator/icvv-generator';
+import { DcvvGenerator } from './discover/dcvv-generator/dcvv-generator';
 
 type Network = 'mastercard' | 'visa' | 'discover' | null;
-type Tool = 'cryptogram' | 'arpc' | 'tc' | 'aac' | null;
+type Tool = 'arqc' | 'cvv' | 'icvv' | 'dcvv' | null;
 
 const NETWORKS: Network[] = ['discover', 'mastercard', 'visa'];
+const TOOLS: Tool[] = ['arqc', 'cvv', 'icvv', 'dcvv'];
 
-// Tool name in the code  <->  word in the address bar
-const TOOL_TO_URL: Record<Exclude<Tool, null>, string> = {
-  cryptogram: 'arqc',
-  arpc: 'arpc',
-  tc: 'tc',
-  aac: 'aac'
-};
-const URL_TO_TOOL: Record<string, Tool> = {
-  arqc: 'cryptogram',
-  arpc: 'arpc',
-  tc: 'tc',
-  aac: 'aac'
+// How each tool is written on buttons and headings
+const TOOL_LABELS: Record<Exclude<Tool, null>, string> = {
+  arqc: 'ARQC',
+  cvv: 'CVV',
+  icvv: 'iCVV',
+  dcvv: 'DCVV'
 };
 
-// Turns an address like /discover/arqc into { network, tool, valid }
+// Turns an address like /discover/cvv into { network, tool, valid }
 function parseUrl(url: string): { network: Network; tool: Tool; valid: boolean } {
   const path = url.split(/[?#]/)[0];
   const segments = path.split('/').filter(Boolean).map(s => s.toLowerCase());
   const [networkPart, toolPart] = segments;
 
   const network = NETWORKS.includes(networkPart as Network) ? (networkPart as Network) : null;
-  const tool = network && toolPart ? (URL_TO_TOOL[toolPart] ?? null) : null;
+  const tool = network && TOOLS.includes(toolPart as Tool) ? (toolPart as Tool) : null;
   const valid = segments.length <= 2 && (!networkPart || !!network) && (!toolPart || !!tool);
 
   return valid ? { network, tool, valid } : { network: null, tool: null, valid };
@@ -42,7 +37,7 @@ function parseUrl(url: string): { network: Network; tool: Tool; valid: boolean }
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, ArqcGenerator, ArpcGenerator, TcGenerator, AacGenerator],
+  imports: [CommonModule, ArqcGenerator, CvvGenerator, IcvvGenerator, DcvvGenerator],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -50,9 +45,11 @@ export class App {
   private router = inject(Router);
 
   title = 'cryptogram-generator';
+  tools = TOOLS;
+  toolLabels = TOOL_LABELS;
 
-  // The current address, kept as a signal. Angular automatically redraws the
-  // page whenever it changes - including the browser's Back/Forward buttons.
+  // The current address as a signal: Angular redraws the page whenever it
+  // changes - including the browser's Back/Forward buttons.
   private currentUrl = toSignal(
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
@@ -72,6 +69,10 @@ export class App {
     return this.route().tool;
   }
 
+  get selectedToolLabel(): string {
+    return this.selectedTool ? TOOL_LABELS[this.selectedTool] : '';
+  }
+
   constructor() {
     // Unknown address (e.g. /abc or /discover/xyz) -> go to the start page
     this.router.events
@@ -83,24 +84,28 @@ export class App {
       });
   }
 
-  get isStandardCryptogramFunctional(): boolean {
-    return this.selectedNetwork === 'discover' && this.selectedTool === 'cryptogram';
+  get isDiscover(): boolean {
+    return this.selectedNetwork === 'discover';
   }
 
-  get isTcFunctional(): boolean {
-    return this.selectedNetwork === 'discover' && this.selectedTool === 'tc';
+  get isArqcFunctional(): boolean {
+    return this.isDiscover && this.selectedTool === 'arqc';
   }
 
-  get isAacFunctional(): boolean {
-    return this.selectedNetwork === 'discover' && this.selectedTool === 'aac';
+  get isCvvFunctional(): boolean {
+    return this.isDiscover && this.selectedTool === 'cvv';
   }
 
-  get isArpcFunctional(): boolean {
-    return this.selectedNetwork === 'discover' && this.selectedTool === 'arpc';
+  get isIcvvFunctional(): boolean {
+    return this.isDiscover && this.selectedTool === 'icvv';
+  }
+
+  get isDcvvFunctional(): boolean {
+    return this.isDiscover && this.selectedTool === 'dcvv';
   }
 
   get isFunctional(): boolean {
-    return this.isStandardCryptogramFunctional || this.isTcFunctional || this.isAacFunctional || this.isArpcFunctional;
+    return this.isArqcFunctional || this.isCvvFunctional || this.isIcvvFunctional || this.isDcvvFunctional;
   }
 
   // Buttons change the address; the page follows automatically
@@ -112,7 +117,7 @@ export class App {
     if (!this.selectedNetwork || !tool) {
       return;
     }
-    this.router.navigate(['/', this.selectedNetwork, TOOL_TO_URL[tool]]);
+    this.router.navigate(['/', this.selectedNetwork, tool]);
   }
 
   goBackToNetworks() {

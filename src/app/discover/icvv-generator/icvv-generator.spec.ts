@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
-import { TcGenerator } from './tc-generator';
+import { IcvvGenerator } from './icvv-generator';
 
-describe('TcGenerator', () => {
-  let component: TcGenerator;
-  let fixture: ComponentFixture<TcGenerator>;
+describe('IcvvGenerator', () => {
+  let component: IcvvGenerator;
+  let fixture: ComponentFixture<IcvvGenerator>;
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TcGenerator, HttpClientTestingModule],
+      imports: [IcvvGenerator, HttpClientTestingModule],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(TcGenerator);
+    fixture = TestBed.createComponent(IcvvGenerator);
     component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
@@ -37,16 +37,21 @@ describe('TcGenerator', () => {
     const form = fixture.debugElement.query(By.css('form')).nativeElement;
     form.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
-    httpMock.expectNone('/api/tc');
+    httpMock.expectNone('/api/icvv');
   });
 
-  it('should send a POST to /api/tc with valid input and handle the response', async () => {
-    setInputValue('#tag8A', '3030');
-    setInputValue('#tag9F02', '000000010000');
-    setInputValue('#tag5F2A', '0978');
-    setInputValue('#tag9F37', '12345678');
-    setInputValue('#tag9F36', '0001');
-    setInputValue('#tag9F10', '06150102030405060708');
+  it('should show a required error once a field is touched and left empty', async () => {
+    setInputValue('#pan', '1');
+    setInputValue('#pan', '');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('This field is required');
+  });
+
+  it('should send a POST to /api/icvv with valid input and handle the response', async () => {
+    setInputValue('#pan', '4123456789012345');
+    setInputValue('#expiry', '8701');
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -55,15 +60,13 @@ describe('TcGenerator', () => {
     form.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
 
-    const req = httpMock.expectOne('/api/tc');
+    const req = httpMock.expectOne('/api/icvv');
     expect(req.request.method).toBe('POST');
-    expect(req.request.body.tag_8a).toBe('3030');
-    expect(req.request.body.tag_9f02).toBe('000000010000');
-    req.flush({ result: '722699D3734B40C1', type: 'TC', cid: '40' });
+    expect(req.request.body.pan).toBe('4123456789012345');
+    req.flush({ result: '651' });
 
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(component.response.result).toBe('722699D3734B40C1');
-    expect(component.response.cid).toBe('40');
+    expect(component.response.result).toBe('651');
   });
 });

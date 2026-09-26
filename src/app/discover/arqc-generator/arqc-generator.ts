@@ -13,11 +13,11 @@ import { finalize } from 'rxjs/operators';
 export class ArqcGenerator {
 
   title = 'ARQC Generator';
-  subtitle = 'Authorisation Request \u2014 Cryptogram sent to the issuer for approval';
-  apiUrl = '/api/save';
+  subtitle = 'Authorization Request Cryptogram — Application Cryptogram (9F26)';
+  apiUrl = '/api/arqc';
   resultPrefix = 'The computed ARQC is:';
 
-    macRequest = {
+  arqcRequest = {
     tag_9f02: '',
     tag_5f2a: '',
     tag_9f37: '',
@@ -43,10 +43,7 @@ export class ArqcGenerator {
     this.error_response = null;
     this.isSubmitting = true;
 
-    this.http.post(
-      this.apiUrl,
-      this.macRequest
-    ).pipe(
+    this.http.post(this.apiUrl, this.arqcRequest).pipe(
       finalize(() => {
         this.isSubmitting = false;
         this.cdr.detectChanges();

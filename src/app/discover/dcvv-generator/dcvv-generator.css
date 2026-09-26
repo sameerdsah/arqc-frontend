@@ -1,0 +1,18 @@
+h2 {
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.container {
+  padding: 6px 20px 15px 20px;
+}
+
+.maintenance-text {
+  text-align: center;
+  color: #b00020;
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin: 24px 0 8px;
+}
