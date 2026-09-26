@@ -1,7 +1,12 @@
+import { Component } from '@angular/core';
 import { Routes } from '@angular/router';
 
-// The page shown is decided in app.ts from the URL,
-// so every address is accepted here and handled there.
+// Placeholder: pages are shown by app.html based on the URL,
+// so this component is never displayed.
+@Component({ template: '' })
+class UrlOnly {}
+
 export const routes: Routes = [
-  { path: '**', children: [] }
+  { path: '', component: UrlOnly },    // home page - pre-rendered as index.html
+  { path: '**', component: UrlOnly }   // every other address
 ];
