@@ -3,16 +3,15 @@
   <div class="selector-container" *ngIf="!selectedNetwork">
     <h1>Select Card Network</h1>
     <div class="network-options">
-      <button class="network-btn" (click)="selectNetwork('discover')">Discover</button>
-      <button class="network-btn" (click)="selectNetwork('mastercard')">Mastercard</button>
-      <button class="network-btn" (click)="selectNetwork('visa')">Visa</button>
+      <button class="network-btn" *ngFor="let network of networks" (click)="selectNetwork(network)">{{ networkConfig[network].label }}</button>
     </div>
   </div>
 
   <div class="selector-container" *ngIf="selectedNetwork && !selectedTool">
-    <h2>{{ selectedNetwork === 'mastercard' ? 'Mastercard' : selectedNetwork === 'visa' ? 'Visa' : 'Discover' }}</h2>
+    <h2>{{ selectedNetworkConfig?.label }}</h2>
+    <p class="network-platform">{{ selectedNetworkConfig?.platform }}</p>
     <div class="network-options">
-      <button class="network-btn" *ngFor="let tool of tools" (click)="selectTool(tool)">{{ toolLabels[tool!] }}</button>
+      <button class="network-btn" *ngFor="let tool of selectedNetworkConfig?.tools" (click)="selectTool(tool.slug)" [title]="tool.name">{{ tool.label }}</button>
     </div>
     <button class="back-btn-bottom" (click)="goBackToNetworks()">&larr; Back</button>
   </div>
@@ -22,8 +21,18 @@
     <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>
 
+  <div class="arqc-wrapper" *ngIf="isArpcFunctional">
+    <app-arpc-generator></app-arpc-generator>
+    <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
+  </div>
+
   <div class="arqc-wrapper" *ngIf="isCvvFunctional">
     <app-cvv-generator></app-cvv-generator>
+    <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
+  </div>
+
+  <div class="arqc-wrapper" *ngIf="isCidFunctional">
+    <app-cid-generator></app-cid-generator>
     <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>
 
@@ -39,6 +48,7 @@
 
   <div class="selector-container" *ngIf="selectedTool && !isFunctional">
     <h2>{{ selectedToolLabel }}</h2>
+    <p class="network-platform">{{ selectedToolName }}</p>
     <p class="maintenance-text">Under Maintenance</p>
     <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>

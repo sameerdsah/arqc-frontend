@@ -74,3 +74,10 @@
   box-sizing: border-box;
   text-align: center;
 }
+
+.network-platform {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin: -8px 0 20px;
+}

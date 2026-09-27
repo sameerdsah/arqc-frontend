@@ -2,20 +2,20 @@
   <h2>{{ title }}</h2>
   <p class="subtitle" *ngIf="subtitle">{{ subtitle }}</p>
 
-  <form #icvvForm="ngForm" (ngSubmit)="submitForm(icvvForm)">
+  <form #cidForm="ngForm" (ngSubmit)="submitForm(cidForm)">
 
     <div class="form-group">
       <label for="pan">Tag 5A (PAN) *</label>
-      <input type="text" id="pan" name="pan" [(ngModel)]="icvvRequest.pan" #pan="ngModel" required pattern="^[0-9]{13,19}$">
-      <div class="error" *ngIf="pan.invalid && (pan.dirty || icvvForm.submitted)">
+      <input type="text" id="pan" name="pan" [(ngModel)]="cidRequest.pan" #pan="ngModel" required pattern="^[0-9]{13,19}$">
+      <div class="error" *ngIf="pan.invalid && (pan.dirty || cidForm.submitted)">
         <span *ngIf="pan.errors?.['required']">This field is required</span>
         <span *ngIf="pan.errors?.['pattern']">Please enter a valid PAN</span>
       </div>
     </div>
     <div class="form-group">
       <label for="expiry">Expiry Date (YYMM) *</label>
-      <input type="text" id="expiry" name="expiry" [(ngModel)]="icvvRequest.expiry" #expiry="ngModel" required pattern="^[0-9]{2}(0[1-9]|1[0-2])$">
-      <div class="error" *ngIf="expiry.invalid && (expiry.dirty || icvvForm.submitted)">
+      <input type="text" id="expiry" name="expiry" [(ngModel)]="cidRequest.expiry" #expiry="ngModel" required pattern="^[0-9]{2}(0[1-9]|1[0-2])$">
+      <div class="error" *ngIf="expiry.invalid && (expiry.dirty || cidForm.submitted)">
         <span *ngIf="expiry.errors?.['required']">This field is required</span>
         <span *ngIf="expiry.errors?.['pattern']">Please enter a valid expiry date</span>
       </div>
@@ -24,7 +24,7 @@
     <button
       type="submit"
       [disabled]="isSubmitting"
-      [class.btn-disabled-look]="icvvForm.invalid || isSubmitting"
+      [class.btn-disabled-look]="cidForm.invalid || isSubmitting"
     >
       {{ isSubmitting ? 'Calculating...' : 'Submit' }}
     </button>
@@ -36,7 +36,7 @@
       {{ resultPrefix }} <strong class="crypto-value">{{ response.result }}</strong>
     </p>
     <p *ngIf="isError" class="response-error">
-      <strong>Unable to calculate the iCVV</strong><br>
+      <strong>Unable to calculate the CID</strong><br>
       <small>{{ error_response }}</small>
     </p>
   </div>

@@ -88,3 +88,16 @@ button:disabled {
 .container {
   padding: 6px 20px 15px 20px;
 }
+
+/* Team feedback: labels left-aligned with their textboxes; one line of space after the subtitle */
+.subtitle {
+  text-align: center;
+  margin: 0 0 24px;
+}
+
+form,
+.form-group,
+label,
+.error {
+  text-align: left;
+}
