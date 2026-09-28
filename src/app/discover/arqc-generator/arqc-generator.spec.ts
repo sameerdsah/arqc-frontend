@@ -49,6 +49,29 @@ describe('ArqcGenerator', () => {
     expect(fixture.nativeElement.textContent).toContain('This field is required');
   });
 
+  async function typeAndCheck(selector: string, value: string, message: string) {
+    setInputValue(selector, value);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain(message);
+  }
+
+  it('should require Tag 9F02 to be exactly 12 digits', async () => {
+    await typeAndCheck('#tag9F02', '1', 'Please enter a valid amount');
+    await typeAndCheck('#tag9F02', '00000001000A', 'Please enter a valid amount');
+  });
+
+  it('should require Tag 5F2A to be exactly 4 digits', async () => {
+    await typeAndCheck('#tag5F2A', '978', 'Please enter a valid currency code');
+    await typeAndCheck('#tag5F2A', '09AB', 'Please enter a valid currency code');
+  });
+
+  it('should require Tag 9F10 to be 20-64 hex characters of even length', async () => {
+    await typeAndCheck('#tag9F10', '0615', 'Please enter valid issuer application data');
+    await typeAndCheck('#tag9F10', '061501020304050607080', 'Please enter valid issuer application data');
+  });
+
   it('should send a POST to /api/arqc with valid input and handle the response', async () => {
     setInputValue('#tag9F02', '000000010000');
     setInputValue('#tag5F2A', '0978');
