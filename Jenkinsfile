@@ -1,40 +1,65 @@
+// EMV Crypto UI (Angular) - CI/CD pipeline
+// Unit tests (Vitest) -> build image (Angular build + Nginx) -> push to Amazon ECR -> deploy.
+// AWS access comes from the server's IAM role (emv-crypto-ec2-role): no keys stored in Jenkins.
 pipeline {
-    agent { label 'built-in' }
-    environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
-        AWS_DEFAULT_REGION = 'eu-north-1'
-        ECR_REPO = '783582067637.dkr.ecr.eu-north-1.amazonaws.com/arqc-frontend'
+    agent any
+
+    options {
+        timestamps()
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
+
+    environment {
+        AWS_REGION = 'eu-north-1'
+        REGISTRY   = '783582067637.dkr.ecr.eu-north-1.amazonaws.com'
+        IMAGE      = "${REGISTRY}/emv-crypto-ui"
+        DEPLOY_DIR = '/home/ubuntu/deploy'
+    }
+
     stages {
-               stage('Unit Tests') {
+        stage('Unit Tests') {
             steps {
+                // Runs the Angular tests in a throwaway Node container that shares this workspace.
                 sh '''
-                    npm install
-                    npm run test -- --watch=false
+                    docker run --rm --volumes-from jenkins -w "$WORKSPACE" \
+                      --user "$(id -u):$(id -g)" -e HOME=/tmp -e CI=true \
+                      node:24-alpine sh -c "npm ci --no-audit --no-fund && npx ng test --watch=false"
                 '''
             }
         }
+
         stage('Build Image') {
             steps {
-                sh 'docker build -t $ECR_REPO:$BUILD_NUMBER -t $ECR_REPO:latest .'
+                sh 'docker build -t $IMAGE:$BUILD_NUMBER -t $IMAGE:latest .'
             }
         }
+
         stage('Push to ECR') {
             steps {
-                sh 'aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REPO'
-                sh 'docker push $ECR_REPO:$BUILD_NUMBER'
-                sh 'docker push $ECR_REPO:latest'
-            }
-        }
-        stage('Deploy') {
-            steps {
                 sh '''
-                    cd /home/ubuntu/deploy
-                    docker compose pull frontend
-                    docker compose up -d frontend
+                    aws ecr get-login-password --region $AWS_REGION \
+                      | docker login --username AWS --password-stdin $REGISTRY
+                    docker push $IMAGE:$BUILD_NUMBER
+                    docker push $IMAGE:latest
                 '''
             }
         }
+
+        stage('Deploy') {
+            steps {
+                // Starts the UI and the Caddy HTTPS gateway (the API must already be deployed).
+                sh '''
+                    cd $DEPLOY_DIR
+                    docker compose pull frontend caddy
+                    docker compose up -d
+                '''
+            }
+        }
+    }
+
+    post {
+        success { echo "Deployed emv-crypto-ui build ${env.BUILD_NUMBER}" }
+        always  { sh 'docker image prune -f || true' }
     }
 }
