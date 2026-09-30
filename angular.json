@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "arqc-generator": {
+    "emv-crypto-ui": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -65,10 +65,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "arqc-generator:build:production"
+              "buildTarget": "emv-crypto-ui:build:production"
             },
             "development": {
-              "buildTarget": "arqc-generator:build:development"
+              "buildTarget": "emv-crypto-ui:build:development"
             }
           },
           "defaultConfiguration": "development"
