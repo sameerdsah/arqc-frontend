@@ -93,27 +93,26 @@ describe('App', () => {
     expect(el.querySelector('app-dcvv-generator')).toBeTruthy();
   });
 
-  it('shows "Under Maintenance" with the full name for options without a page yet', async () => {
-    await go('/amex/csc');
-    expect(el.querySelector('h2')?.textContent?.trim()).toBe('CSC');
-    expect(el.textContent).toContain('Card Security Code (magnetic stripe)');
-    expect(el.querySelector('.maintenance-text')?.textContent).toContain('Under Maintenance');
-  });
-
   // Each network has its own folder of pages; [address, page element, title, working?]
   const NETWORK_PAGES: [string, string, string, boolean][] = [
-    ['/visa/arqc', 'app-visa-arqc-generator', 'ARQC Generator', false],
-    ['/visa/arpc', 'app-visa-arpc-generator', 'ARPC Generator', false],
+    ['/visa/arqc', 'app-visa-arqc-generator', 'ARQC Generator', true],
+    ['/visa/arpc', 'app-visa-arpc-generator', 'ARPC Generator', true],
     ['/visa/cvv', 'app-visa-cvv-generator', 'CVV Generator', true],
     ['/visa/cvv2', 'app-visa-cvv2-generator', 'CVV2 Generator', true],
     ['/visa/icvv', 'app-visa-icvv-generator', 'iCVV Generator', true],
     ['/visa/dcvv', 'app-visa-dcvv-generator', 'dCVV Generator', false],
-    ['/mastercard/arqc', 'app-mastercard-arqc-generator', 'ARQC Generator', false],
-    ['/mastercard/arpc', 'app-mastercard-arpc-generator', 'ARPC Generator', false],
+    ['/mastercard/arqc', 'app-mastercard-arqc-generator', 'ARQC Generator', true],
+    ['/mastercard/arpc', 'app-mastercard-arpc-generator', 'ARPC Generator', true],
     ['/mastercard/cvc1', 'app-mastercard-cvc1-generator', 'CVC1 Generator', true],
     ['/mastercard/cvc2', 'app-mastercard-cvc2-generator', 'CVC2 Generator', true],
     ['/mastercard/chip-cvc', 'app-mastercard-chip-cvc-generator', 'Chip CVC Generator', true],
-    ['/mastercard/cvc3', 'app-mastercard-cvc3-generator', 'CVC3 Generator', false]
+    ['/mastercard/cvc3', 'app-mastercard-cvc3-generator', 'CVC3 Generator', false],
+    ['/amex/arqc', 'app-amex-arqc-generator', 'ARQC Generator', false],
+    ['/amex/arpc', 'app-amex-arpc-generator', 'ARPC Generator', true],
+    ['/amex/csc', 'app-amex-csc-generator', 'CSC Generator', false],
+    ['/amex/cid', 'app-amex-cid-generator', 'CID Generator', false],
+    ['/amex/chip-csc', 'app-amex-chip-csc-generator', 'Chip CSC Generator', false],
+    ['/amex/dynamic-csc', 'app-amex-dynamic-csc-generator', 'Dynamic CSC Generator', false]
   ];
 
   for (const [url, selector, title, working] of NETWORK_PAGES) {
@@ -133,6 +132,10 @@ describe('App', () => {
 
     await go('/mastercard/cvc2');
     expect(el.querySelector('app-cid-generator')).toBeNull();
+
+    await go('/amex/cid');
+    expect(el.querySelector('app-cid-generator')).toBeNull();
+    expect(el.querySelector('app-amex-cid-generator')).toBeTruthy();
   });
 
   it('sends unknown addresses back to the start page', async () => {

@@ -1,0 +1,36 @@
+<div class="container">
+  <h2>{{ config.title }}</h2>
+  <p class="subtitle" *ngIf="config.subtitle">{{ config.subtitle }}</p>
+
+  <form #arqcForm="ngForm" (ngSubmit)="submitForm(arqcForm)">
+
+    <div class="form-group" *ngFor="let field of fields">
+      <label [for]="field.id">{{ field.label }} *</label>
+      <input type="text" [id]="field.id" [name]="field.key" [(ngModel)]="arqcRequest[field.key]" #ctrl="ngModel" required [pattern]="field.pattern">
+      <div class="error" *ngIf="ctrl.invalid && (ctrl.dirty || arqcForm.submitted)">
+        <span *ngIf="ctrl.errors?.['required']">This field is required</span>
+        <span *ngIf="ctrl.errors?.['pattern']">{{ field.message }}</span>
+      </div>
+    </div>
+
+    <button
+      type="submit"
+      [disabled]="isSubmitting"
+      [class.btn-disabled-look]="arqcForm.invalid || isSubmitting"
+    >
+      {{ isSubmitting ? 'Calculating...' : 'Submit' }}
+    </button>
+
+  </form>
+
+  <div class="response" *ngIf="response || isError">
+    <p *ngIf="!isError && response?.result">
+      The computed ARQC is: <strong class="crypto-value">{{ response.result }}</strong>
+    </p>
+    <p *ngIf="isError" class="response-error">
+      <strong>Unable to calculate the ARQC</strong><br>
+      <small>{{ error_response }}</small>
+    </p>
+  </div>
+
+</div>

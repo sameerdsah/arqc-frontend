@@ -24,6 +24,13 @@ import { VisaCvvGenerator } from './visa/cvv-generator/cvv-generator';
 import { VisaCvv2Generator } from './visa/cvv2-generator/cvv2-generator';
 import { VisaIcvvGenerator } from './visa/icvv-generator/icvv-generator';
 import { VisaDcvvGenerator } from './visa/dcvv-generator/dcvv-generator';
+// American Express
+import { AmexArqcGenerator } from './amex/arqc-generator/arqc-generator';
+import { AmexArpcGenerator } from './amex/arpc-generator/arpc-generator';
+import { AmexCscGenerator } from './amex/csc-generator/csc-generator';
+import { AmexCidGenerator } from './amex/cid-generator/cid-generator';
+import { AmexChipCscGenerator } from './amex/chip-csc-generator/chip-csc-generator';
+import { AmexDynamicCscGenerator } from './amex/dynamic-csc-generator/dynamic-csc-generator';
 
 type Network = 'discover' | 'mastercard' | 'visa' | 'amex' | null;
 type Tool = string | null;
@@ -100,7 +107,7 @@ const NETWORKS: Exclude<Network, null>[] = ['discover', 'mastercard', 'visa', 'a
 
 // Which page (component) is shown for each address, e.g. /visa/cvv2.
 // Each network has its own folder with one sub-folder per page.
-// An address without an entry here (American Express) shows "Under Maintenance".
+// An address without an entry here shows the generic "Under Maintenance" page.
 const PAGE_COMPONENTS: Record<string, Type<unknown>> = {
   'discover/arqc': ArqcGenerator,
   'discover/arpc': ArpcGenerator,
@@ -121,7 +128,14 @@ const PAGE_COMPONENTS: Record<string, Type<unknown>> = {
   'visa/cvv': VisaCvvGenerator,
   'visa/cvv2': VisaCvv2Generator,
   'visa/icvv': VisaIcvvGenerator,
-  'visa/dcvv': VisaDcvvGenerator
+  'visa/dcvv': VisaDcvvGenerator,
+
+  'amex/arqc': AmexArqcGenerator,
+  'amex/arpc': AmexArpcGenerator,
+  'amex/csc': AmexCscGenerator,
+  'amex/cid': AmexCidGenerator,
+  'amex/chip-csc': AmexChipCscGenerator,
+  'amex/dynamic-csc': AmexDynamicCscGenerator
 };
 
 // Turns an address like /discover/cvv into { network, tool, valid }

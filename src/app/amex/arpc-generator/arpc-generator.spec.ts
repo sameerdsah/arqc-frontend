@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
-import { MastercardArpcGenerator } from './arpc-generator';
+import { AmexArpcGenerator } from './arpc-generator';
 
-describe('MastercardArpcGenerator', () => {
-  let fixture: ComponentFixture<MastercardArpcGenerator>;
+describe('AmexArpcGenerator', () => {
+  let fixture: ComponentFixture<AmexArpcGenerator>;
   let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MastercardArpcGenerator, HttpClientTestingModule],
+      imports: [AmexArpcGenerator, HttpClientTestingModule],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MastercardArpcGenerator);
+    fixture = TestBed.createComponent(AmexArpcGenerator);
     httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
   });
@@ -33,7 +33,7 @@ describe('MastercardArpcGenerator', () => {
     expect(text).toContain('EMV Method 1');
   });
 
-  it('should send a POST to /api/mastercard/arpc and show the result', async () => {
+  it('should send a POST to /api/amex/arpc and show the result', async () => {
     setInputValue('#arqc', '37858601E2285A5D');
     setInputValue('#tag8A', '3030');
     fixture.detectChanges();
@@ -42,7 +42,7 @@ describe('MastercardArpcGenerator', () => {
     fixture.debugElement.query(By.css('form')).nativeElement.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
 
-    const req = httpMock.expectOne('/api/mastercard/arpc');
+    const req = httpMock.expectOne('/api/amex/arpc');
     expect(req.request.body).toEqual({ arqc: '37858601E2285A5D', tag_8a: '3030' });
     req.flush({ result: 'C837D13061C1E896', type: 'ARPC' });
     fixture.detectChanges();
