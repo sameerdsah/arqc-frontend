@@ -112,4 +112,22 @@ describe('CardValueGenerator', () => {
     expect(fixture.nativeElement.textContent).toContain('Unable to calculate the CVC2');
     expect(fixture.nativeElement.textContent).toContain('PAN must be 13-19 digits');
   });
+
+  it('shows friendly messages for rate limiting, server errors and no connection', async () => {
+    await create(MASTERCARD_CVC2);
+    const cases: [number, any, Record<string, string>, string][] = [
+      [429, { error: 'Rate limit exceeded' }, { 'Retry-After': '30' }, 'Too many requests – please wait 30 seconds and try again.'],
+      [500, '<html>Internal Server Error</html>', { 'X-Request-ID': '9400e216ea5f4ef095a2d0981730ef02' },
+       'Something went wrong on our side. Reference: 9400e216'],
+      [502, '<html>Bad Gateway</html>', {}, 'The service is unreachable. Please try again shortly.'],
+    ];
+    for (const [status, body, headers, expected] of cases) {
+      await fillAndSubmit({ '#pan': '5555555555554444', '#expiry': '3012' });
+      httpMock.expectOne('/api/mastercard/cvc2').flush(body, { status, statusText: 'Error', headers });
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(fixture.nativeElement.textContent).toContain('Unable to calculate the CVC2');
+      expect(fixture.nativeElement.textContent).toContain(expected);
+    }
+  });
 });

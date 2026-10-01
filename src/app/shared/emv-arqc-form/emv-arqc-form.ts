@@ -3,6 +3,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
+import { friendlyErrorMessage } from '../api-error';
 
 /** Settings for one scheme's ARQC page, e.g. Visa or Mastercard. */
 export interface EmvArqcConfig {
@@ -89,9 +90,9 @@ export class EmvArqcForm implements OnChanges {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Backend error:', err);
+        console.error('Request failed with status', err?.status);
         this.isError = true;
-        this.error_response = err.error?.error ?? 'Unable to reach the server. Please try again.';
+        this.error_response = friendlyErrorMessage(err);
         this.cdr.detectChanges();
       }
     });
