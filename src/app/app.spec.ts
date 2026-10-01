@@ -93,21 +93,46 @@ describe('App', () => {
     expect(el.querySelector('app-dcvv-generator')).toBeTruthy();
   });
 
-  it('shows "Under Maintenance" with the full name for options that are not live yet', async () => {
-    await go('/mastercard/cvc2');
-    expect(el.querySelector('app-arqc-generator')).toBeNull();
-    expect(el.querySelector('h2')?.textContent?.trim()).toBe('CVC2');
-    expect(el.textContent).toContain('Card Validation Code 2 (printed on the card)');
+  it('shows "Under Maintenance" with the full name for options without a page yet', async () => {
+    await go('/amex/csc');
+    expect(el.querySelector('h2')?.textContent?.trim()).toBe('CSC');
+    expect(el.textContent).toContain('Card Security Code (magnetic stripe)');
     expect(el.querySelector('.maintenance-text')?.textContent).toContain('Under Maintenance');
   });
 
-  it('does not show a Discover calculator under another network', async () => {
+  // Each network has its own folder of pages; [address, page element, title, working?]
+  const NETWORK_PAGES: [string, string, string, boolean][] = [
+    ['/visa/arqc', 'app-visa-arqc-generator', 'ARQC Generator', false],
+    ['/visa/arpc', 'app-visa-arpc-generator', 'ARPC Generator', false],
+    ['/visa/cvv', 'app-visa-cvv-generator', 'CVV Generator', true],
+    ['/visa/cvv2', 'app-visa-cvv2-generator', 'CVV2 Generator', true],
+    ['/visa/icvv', 'app-visa-icvv-generator', 'iCVV Generator', true],
+    ['/visa/dcvv', 'app-visa-dcvv-generator', 'dCVV Generator', false],
+    ['/mastercard/arqc', 'app-mastercard-arqc-generator', 'ARQC Generator', false],
+    ['/mastercard/arpc', 'app-mastercard-arpc-generator', 'ARPC Generator', false],
+    ['/mastercard/cvc1', 'app-mastercard-cvc1-generator', 'CVC1 Generator', true],
+    ['/mastercard/cvc2', 'app-mastercard-cvc2-generator', 'CVC2 Generator', true],
+    ['/mastercard/chip-cvc', 'app-mastercard-chip-cvc-generator', 'Chip CVC Generator', true],
+    ['/mastercard/cvc3', 'app-mastercard-cvc3-generator', 'CVC3 Generator', false]
+  ];
+
+  for (const [url, selector, title, working] of NETWORK_PAGES) {
+    it(`opens the ${title} page at ${url}`, async () => {
+      await go(url);
+      const page = el.querySelector(selector);
+      expect(page).toBeTruthy();
+      expect(page?.textContent).toContain(title);
+      expect(!!page?.querySelector('form')).toBe(working);
+      expect(!!page?.querySelector('.maintenance-text')).toBe(!working);
+    });
+  }
+
+  it('does not show a Discover page under another network', async () => {
     await go('/visa/arqc');
     expect(el.querySelector('app-arqc-generator')).toBeNull();
 
-    await go('/amex/cid');
+    await go('/mastercard/cvc2');
     expect(el.querySelector('app-cid-generator')).toBeNull();
-    expect(el.querySelector('.maintenance-text')).toBeTruthy();
   });
 
   it('sends unknown addresses back to the start page', async () => {

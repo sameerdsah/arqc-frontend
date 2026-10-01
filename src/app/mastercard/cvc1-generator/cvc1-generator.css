@@ -1,0 +1,4 @@
+/* Page styling comes from the shared CardValueGenerator form. */
+:host {
+  display: block;
+}

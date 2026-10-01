@@ -1,14 +1,29 @@
-import { Component, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Type, computed, inject } from '@angular/core';
+import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
+// Discover
 import { ArqcGenerator } from './discover/arqc-generator/arqc-generator';
+import { ArpcGenerator } from './discover/arpc-generator/arpc-generator';
 import { CvvGenerator } from './discover/cvv-generator/cvv-generator';
+import { CidGenerator } from './discover/cid-generator/cid-generator';
 import { IcvvGenerator } from './discover/icvv-generator/icvv-generator';
 import { DcvvGenerator } from './discover/dcvv-generator/dcvv-generator';
-import { ArpcGenerator } from './discover/arpc-generator/arpc-generator';
-import { CidGenerator } from './discover/cid-generator/cid-generator';
+// Mastercard
+import { MastercardArqcGenerator } from './mastercard/arqc-generator/arqc-generator';
+import { MastercardArpcGenerator } from './mastercard/arpc-generator/arpc-generator';
+import { MastercardCvc1Generator } from './mastercard/cvc1-generator/cvc1-generator';
+import { MastercardCvc2Generator } from './mastercard/cvc2-generator/cvc2-generator';
+import { MastercardChipCvcGenerator } from './mastercard/chip-cvc-generator/chip-cvc-generator';
+import { MastercardCvc3Generator } from './mastercard/cvc3-generator/cvc3-generator';
+// Visa
+import { VisaArqcGenerator } from './visa/arqc-generator/arqc-generator';
+import { VisaArpcGenerator } from './visa/arpc-generator/arpc-generator';
+import { VisaCvvGenerator } from './visa/cvv-generator/cvv-generator';
+import { VisaCvv2Generator } from './visa/cvv2-generator/cvv2-generator';
+import { VisaIcvvGenerator } from './visa/icvv-generator/icvv-generator';
+import { VisaDcvvGenerator } from './visa/dcvv-generator/dcvv-generator';
 
 type Network = 'discover' | 'mastercard' | 'visa' | 'amex' | null;
 type Tool = string | null;
@@ -83,6 +98,32 @@ const NETWORK_CONFIG: Record<Exclude<Network, null>, NetworkConfig> = {
 
 const NETWORKS: Exclude<Network, null>[] = ['discover', 'mastercard', 'visa', 'amex'];
 
+// Which page (component) is shown for each address, e.g. /visa/cvv2.
+// Each network has its own folder with one sub-folder per page.
+// An address without an entry here (American Express) shows "Under Maintenance".
+const PAGE_COMPONENTS: Record<string, Type<unknown>> = {
+  'discover/arqc': ArqcGenerator,
+  'discover/arpc': ArpcGenerator,
+  'discover/cvv': CvvGenerator,
+  'discover/cid': CidGenerator,
+  'discover/icvv': IcvvGenerator,
+  'discover/dcvv': DcvvGenerator,
+
+  'mastercard/arqc': MastercardArqcGenerator,
+  'mastercard/arpc': MastercardArpcGenerator,
+  'mastercard/cvc1': MastercardCvc1Generator,
+  'mastercard/cvc2': MastercardCvc2Generator,
+  'mastercard/chip-cvc': MastercardChipCvcGenerator,
+  'mastercard/cvc3': MastercardCvc3Generator,
+
+  'visa/arqc': VisaArqcGenerator,
+  'visa/arpc': VisaArpcGenerator,
+  'visa/cvv': VisaCvvGenerator,
+  'visa/cvv2': VisaCvv2Generator,
+  'visa/icvv': VisaIcvvGenerator,
+  'visa/dcvv': VisaDcvvGenerator
+};
+
 // Turns an address like /discover/cvv into { network, tool, valid }
 function parseUrl(url: string): { network: Network; tool: Tool; valid: boolean } {
   const path = url.split(/[?#]/)[0];
@@ -98,7 +139,7 @@ function parseUrl(url: string): { network: Network; tool: Tool; valid: boolean }
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, ArqcGenerator, ArpcGenerator, CvvGenerator, CidGenerator, IcvvGenerator, DcvvGenerator],
+  imports: [CommonModule, NgComponentOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -158,38 +199,11 @@ export class App {
       });
   }
 
-  get isDiscover(): boolean {
-    return this.selectedNetwork === 'discover';
-  }
-
-  get isArqcFunctional(): boolean {
-    return this.isDiscover && this.selectedTool === 'arqc';
-  }
-
-  get isArpcFunctional(): boolean {
-    return this.isDiscover && this.selectedTool === 'arpc';
-  }
-
-  get isCidFunctional(): boolean {
-    return this.isDiscover && this.selectedTool === 'cid';
-  }
-
-  get isCvvFunctional(): boolean {
-    return this.isDiscover && this.selectedTool === 'cvv';
-  }
-
-  get isIcvvFunctional(): boolean {
-    return this.isDiscover && this.selectedTool === 'icvv';
-  }
-
-  get isDcvvFunctional(): boolean {
-    return this.isDiscover && this.selectedTool === 'dcvv';
-  }
-
-  get isFunctional(): boolean {
-    return this.isArqcFunctional || this.isArpcFunctional || this.isCvvFunctional || this.isCidFunctional
-      || this.isIcvvFunctional || this.isDcvvFunctional;
-  }
+  // The component for the current address, or null (start page, network page, or not built yet)
+  readonly pageComponent = computed<Type<unknown> | null>(() => {
+    const { network, tool } = this.route();
+    return network && tool ? PAGE_COMPONENTS[`${network}/${tool}`] ?? null : null;
+  });
 
   // Buttons change the address; the page follows automatically
   selectNetwork(network: Network) {
