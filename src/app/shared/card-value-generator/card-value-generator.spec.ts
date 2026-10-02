@@ -130,4 +130,16 @@ describe('CardValueGenerator', () => {
       expect(fixture.nativeElement.textContent).toContain(expected);
     }
   });
+
+    it('fills the test card of the network with "Use example values"', async () => {
+    await create(VISA_CVV);
+    fixture.nativeElement.querySelector('app-example-values-link button').click();
+    fixture.detectChanges();
+    expect(component.cardRequest).toEqual({ pan: '4111111111111111', expiry: '3012', service_code: '101' });
+
+    await create(MASTERCARD_CVC2);
+    fixture.nativeElement.querySelector('app-example-values-link button').click();
+    fixture.detectChanges();
+    expect(component.cardRequest).toEqual({ pan: '5555555555554444', expiry: '3012', service_code: '' });
+  });
 });

@@ -64,4 +64,11 @@ describe('ArpcForm', () => {
     expect(fixture.nativeElement.textContent).toContain('The computed ARPC is:');
     expect(component.response.result).toBe('C837D13061C1E896');
   });
+
+  it('fills the documented example values with "Use example values"', async () => {
+    fixture.nativeElement.querySelector('app-example-values-link button').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.arpcRequest).toEqual({ arqc: '37858601E2285A5D', tag_8a: '3030' });
+  });
 });

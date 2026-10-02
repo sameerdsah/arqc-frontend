@@ -106,4 +106,11 @@ describe('ArqcGenerator', () => {
                                             tag_9f36: '0001', tag_9f10: '06150102030405060708' });
     expect(fixture.nativeElement.textContent).toContain('not needed');   // 9F26 / 9F27 are listed but not used
   });
+
+  it('fills the documented example values with "Use example values"', async () => {
+    fixture.nativeElement.querySelector('app-example-values-link button').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.arqcRequest).toEqual({ tag_9f02: '000000010000', tag_5f2a: '0978', tag_9f37: '12345678', tag_9f36: '0001', tag_9f10: '06150102030405060708' });
+  });
 });

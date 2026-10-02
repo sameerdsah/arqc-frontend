@@ -4,6 +4,8 @@
 
   <form #cvvForm="ngForm" (ngSubmit)="submitForm(cvvForm)">
 
+    <app-example-values-link (use)="useExampleValues()"></app-example-values-link>
+
     <div class="form-group">
       <label for="pan">Tag 5A (PAN) *</label>
       <input type="text" id="pan" name="pan" [(ngModel)]="cvvRequest.pan" #pan="ngModel" required pattern="^[0-9]{13,19}$">

@@ -3,11 +3,12 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
+import { ExampleValuesLink } from '../../shared/example-values-link/example-values-link';
 import { friendlyErrorMessage } from '../../shared/api-error';
 
 @Component({
   selector: 'app-cid-generator',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, ExampleValuesLink],
   templateUrl: './cid-generator.html',
   styleUrl: './cid-generator.css'
 })
@@ -29,6 +30,14 @@ export class CidGenerator {
   error_response: any = null;
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+
+  /** Fills the documented test values (they give the documented result). */
+  useExampleValues() {
+    this.cidRequest = { pan: '4123456789012345', expiry: '8701' };
+    this.response = null;
+    this.isError = false;
+    this.error_response = null;
+  }
 
   submitForm(form: NgForm) {
     if (form.invalid) {

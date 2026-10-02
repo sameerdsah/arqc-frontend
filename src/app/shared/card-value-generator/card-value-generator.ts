@@ -3,6 +3,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
+import { ExampleValuesLink } from '../example-values-link/example-values-link';
 import { friendlyErrorMessage } from '../api-error';
 
 /** Settings for one card verification page, e.g. Visa CVV2 or Mastercard Chip CVC. */
@@ -21,7 +22,7 @@ export interface CardValueConfig {
  */
 @Component({
   selector: 'app-card-value-generator',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, ExampleValuesLink],
   templateUrl: './card-value-generator.html',
   styleUrl: './card-value-generator.css'
 })
@@ -48,6 +49,15 @@ export class CardValueGenerator implements OnChanges {
 
   get resultPrefix(): string {
     return `The computed ${this.config.valueName} is:`;
+  }
+
+  /** Fills the network's usual test card (Visa 4111..., Mastercard 5555...); service code 101 where asked. */
+  useExampleValues() {
+    const pan = this.config.apiUrl.includes('/mastercard/') ? '5555555555554444' : '4111111111111111';
+    this.cardRequest = { pan, expiry: '3012', service_code: this.config.needsServiceCode ? '101' : '' };
+    this.response = null;
+    this.isError = false;
+    this.error_response = null;
   }
 
   submitForm(form: NgForm) {

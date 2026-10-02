@@ -4,6 +4,8 @@
 
   <form #arpcForm="ngForm" (ngSubmit)="submitForm(arpcForm)">
 
+    <app-example-values-link (use)="useExampleValues()"></app-example-values-link>
+
     <div class="form-group">
       <label for="arqc">Tag 9F26 (ARQC) *</label>
       <input type="text" id="arqc" name="arqc" [(ngModel)]="arpcRequest.arqc" #arqc="ngModel" required pattern="^[0-9A-Fa-f]{16}$">

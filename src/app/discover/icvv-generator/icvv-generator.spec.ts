@@ -69,4 +69,11 @@ describe('IcvvGenerator', () => {
     await fixture.whenStable();
     expect(component.response.result).toBe('651');
   });
+
+  it('fills the documented example values with "Use example values"', async () => {
+    fixture.nativeElement.querySelector('app-example-values-link button').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.icvvRequest).toEqual({ pan: '4123456789012345', expiry: '8701' });
+  });
 });

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
-import { EmvArqcForm, EmvArqcConfig, todayYymmdd } from './emv-arqc-form';
+import { EmvArqcForm, EmvArqcConfig } from './emv-arqc-form';
 
 const CONFIG: EmvArqcConfig = {
   title: 'ARQC Generator', subtitle: 'Authorization Request Cryptogram (9F26)',
@@ -68,29 +68,14 @@ describe('EmvArqcForm', () => {
     expect(headings).toEqual(['Transaction data', 'Terminal and card data']);
   });
 
-  it('pre-fills the terminal and card data with typical test values and leaves the transaction data empty', () => {
-    expect(value('#tag9F02')).toBe('');
-    expect(value('#tag9F10')).toBe('');
-    expect(value('#tag9F03')).toBe('000000000000');
-    expect(value('#tag9F1A')).toBe('0826');
-    expect(value('#tag5F2A')).toBe('0826');
-    expect(value('#tag95')).toBe('0000000000');
-    expect(value('#tag9A')).toBe(todayYymmdd());
-    expect(value('#tag9C')).toBe('00');
-    expect(value('#tag82')).toBe('3C00');
-  });
-
-  it('needs only the four transaction fields to calculate', async () => {
-    await fillAndSubmit({ '#tag9F02': '000000010000', '#tag9F37': '12345678', '#tag9F36': '0001', '#tag9F10': '06010A03A00000' });
-    const req = httpMock.expectOne('/api/visa/arqc');
-    expect(Object.keys(req.request.body).length).toBe(11);
-    expect(req.request.body.tag_9a).toBe(todayYymmdd());
-    expect(req.request.body.tag_82).toBe('3C00');
-    req.flush({ result: '0000000000000000', type: 'ARQC' });
+  it('starts with every field empty', () => {
+    for (const id of ['#tag9F02', '#tag9F10', '#tag9F03', '#tag9F1A', '#tag9A', '#tag82']) {
+      expect(value(id)).toBe('');
+    }
   });
 
   it('fills all fields with the documented example values', async () => {
-    (fixture.nativeElement.querySelector('.link-btn') as HTMLButtonElement).click();
+    (fixture.nativeElement.querySelector('app-example-values-link button') as HTMLButtonElement).click();
     fixture.detectChanges();
     await fixture.whenStable();
     fixture.detectChanges();
@@ -104,11 +89,6 @@ describe('EmvArqcForm', () => {
       tag_9a: '261001', tag_9c: '00', tag_82: '3C00'
     });
     req.flush({ result: '949BBD6013450C7D', type: 'ARQC' });
-  });
-
-  it('formats today as YYMMDD for tag 9A', () => {
-    expect(todayYymmdd(new Date(2026, 9, 2))).toBe('261002');
-    expect(todayYymmdd(new Date(2030, 0, 9))).toBe('300109');
   });
 
   it('does not send a request when a field has the wrong format', async () => {

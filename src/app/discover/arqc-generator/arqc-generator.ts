@@ -3,13 +3,14 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
+import { ExampleValuesLink } from '../../shared/example-values-link/example-values-link';
 import { ChipDataPaste } from '../../shared/chip-data-paste/chip-data-paste';
 import { buildTlv } from '../../core/emv/tlv';
 import { friendlyErrorMessage } from '../../shared/api-error';
 
 @Component({
   selector: 'app-arqc-generator',
-  imports: [FormsModule, CommonModule, ChipDataPaste],
+  imports: [FormsModule, CommonModule, ExampleValuesLink, ChipDataPaste],
   templateUrl: './arqc-generator.html',
   styleUrl: './arqc-generator.css'
 })
@@ -42,6 +43,14 @@ export class ArqcGenerator {
 
   applyChipData(values: Record<string, string>) {
     this.arqcRequest = { ...this.arqcRequest, ...values };
+    this.response = null;
+    this.isError = false;
+    this.error_response = null;
+  }
+
+  /** Fills the documented test values (they give the documented result). */
+  useExampleValues() {
+    this.arqcRequest = { tag_9f02: '000000010000', tag_5f2a: '0978', tag_9f37: '12345678', tag_9f36: '0001', tag_9f10: '06150102030405060708' };
     this.response = null;
     this.isError = false;
     this.error_response = null;

@@ -6,11 +6,12 @@
 
   <form #arqcForm="ngForm" (ngSubmit)="submitForm(arqcForm)">
 
+    <app-example-values-link (use)="useExampleValues()"></app-example-values-link>
+
     <ng-container *ngFor="let field of fields; let first = first">
     <div class="section-head" *ngIf="field.heading">
       <span>{{ field.heading }}</span>
-      <button type="button" class="link-btn" *ngIf="first" (click)="useExampleValues()">Use example values</button>
-      <small *ngIf="!first">Pre-filled with typical test values &ndash; change them if your test needs to</small>
+      <small *ngIf="!first">Usually the same for every test</small>
     </div>
     <div class="form-group">
       <label [for]="field.id">{{ field.label }} *</label>

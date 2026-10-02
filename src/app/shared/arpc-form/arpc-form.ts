@@ -3,6 +3,7 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
+import { ExampleValuesLink } from '../example-values-link/example-values-link';
 import { friendlyErrorMessage } from '../api-error';
 
 /** Settings for one scheme's ARPC page. */
@@ -15,7 +16,7 @@ export interface ArpcConfig {
 /** One reusable ARPC form (EMV Method 1): ARQC + Authorisation Response Code (8A). */
 @Component({
   selector: 'app-arpc-form',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, ExampleValuesLink],
   templateUrl: './arpc-form.html',
   styleUrl: './arpc-form.css'
 })
@@ -34,6 +35,14 @@ export class ArpcForm implements OnChanges {
 
   ngOnChanges() {
     this.arpcRequest = { arqc: '', tag_8a: '' };
+    this.response = null;
+    this.isError = false;
+    this.error_response = null;
+  }
+
+  /** Fills the documented test values (they give the documented result). */
+  useExampleValues() {
+    this.arpcRequest = { arqc: '37858601E2285A5D', tag_8a: '3030' };
     this.response = null;
     this.isError = false;
     this.error_response = null;

@@ -70,4 +70,11 @@ describe('CvvGenerator', () => {
     await fixture.whenStable();
     expect(component.response.result).toBe('561');
   });
+
+  it('fills the documented example values with "Use example values"', async () => {
+    fixture.nativeElement.querySelector('app-example-values-link button').click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.cvvRequest).toEqual({ pan: '4123456789012345', expiry: '8701', service_code: '101' });
+  });
 });

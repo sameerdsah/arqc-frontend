@@ -6,6 +6,8 @@
 
   <form #arqcForm="ngForm" (ngSubmit)="submitForm(arqcForm)">
 
+    <app-example-values-link (use)="useExampleValues()"></app-example-values-link>
+
     <div class="form-group">
       <label for="tag9F02">Tag 9F02 (Amount, Authorized) *</label>
       <input type="text" id="tag9F02" name="tag9F02" [(ngModel)]="arqcRequest.tag_9f02" #tag9F02="ngModel" required pattern="^[0-9]{12}$">
