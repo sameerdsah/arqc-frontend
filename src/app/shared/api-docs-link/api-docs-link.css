@@ -1,5 +1,6 @@
 :host {
   display: block;
+  font-family: "Segoe UI", -apple-system, Roboto, Arial, sans-serif;   /* same font as the rest of the page */
   padding: 14px 24px 0;
   text-align: right;
 }
