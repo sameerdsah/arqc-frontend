@@ -26,11 +26,13 @@ export class ArpcGenerator {
     tag_8a: ''
   };
 
-  // Paste chip data: the ARQC comes from tag 9F26 of the authorisation request (field 55).
-  // The response code 8A is the issuer's decision, so it is normally typed in.
+  // Paste chip data: the ARQC comes from tag 9F26, the response code from tag 8A.
+  // Real request data (field 55) usually has no 8A (the issuer decides it), so it is then typed in;
+  // the example carries 8A = 3030 (approved) so it fills the whole form, like "Use example values".
   readonly chipTargets = ['arqc', 'tag_8a'];
   readonly exampleChipData = buildTlv([['9F02', '000000010000'], ['5F2A', '0978'], ['9F37', '12345678'], ['9F36', '0001'],
-                                       ['9F10', '06150102030405060708'], ['9F26', '37858601E2285A5D'], ['9F27', '80']]);
+                                       ['9F10', '06150102030405060708'], ['9F26', '37858601E2285A5D'], ['9F27', '80'],
+                                       ['8A', '3030']]);
 
   response: any = null;
   isSubmitting = false;
