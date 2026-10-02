@@ -15,16 +15,3 @@ textarea:focus { outline: none; border-color: #1976d2; }
             border-radius: 4px; cursor: pointer; font-size: 0.9rem; }
 .read-btn:hover { background: #eef5fd; }
 .error { color: red; font-size: 0.85rem; margin: 8px 0 0; }
-.ok { color: #177245; font-size: 0.85rem; font-weight: 600; margin: 8px 0 0; }
-.hint { display: block; font-weight: 400; color: #666; margin-top: 2px; }
-.table-wrap { margin-top: 8px; max-height: 220px; overflow: auto; border: 1px solid #edf1f6; border-radius: 4px; }
-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
-th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid #edf1f6; vertical-align: top; }
-th { background: #f6f8fb; position: sticky; top: 0; }
-td code { font-family: 'Courier New', Courier, monospace; color: #0d47a1; word-break: break-all; }
-td:first-child, td:first-child code { white-space: nowrap; word-break: normal; }   /* 9F02 never wraps */
-.tags-toggle { display: block; margin-top: 8px; background: none; border: none; padding: 0; width: auto;
-               color: #1976d2; cursor: pointer; font-size: 0.85rem; text-align: left; }
-.tags-toggle:hover { text-decoration: underline; background: none; }
-tr.unused { color: #888; }
-tr.unused code { color: #888; }

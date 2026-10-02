@@ -80,6 +80,5 @@ describe('ArpcForm', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(component.arpcRequest).toEqual({ arqc: '37858601E2285A5D', tag_8a: '3030' });
-    expect(fixture.nativeElement.textContent).toContain('Still to fill: 8A');
   });
 });

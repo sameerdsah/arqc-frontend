@@ -96,7 +96,7 @@ describe('ArqcGenerator', () => {
     expect(component.response.result).toBe('37858601E2285A5D');
   });
 
-  it('fills the five ARQC fields from pasted chip data and ignores the others', async () => {
+  it('fills the five ARQC fields from pasted chip data and ignores the others (9F26, 9F27)', async () => {
     fixture.debugElement.query(By.css('.toggle')).nativeElement.click();
     fixture.detectChanges();
     fixture.debugElement.query(By.css('app-chip-data-paste .link-btn')).nativeElement.click();
@@ -104,9 +104,6 @@ describe('ArqcGenerator', () => {
     await fixture.whenStable();
     expect(component.arqcRequest).toEqual({ tag_9f02: '000000010000', tag_5f2a: '0978', tag_9f37: '12345678',
                                             tag_9f36: '0001', tag_9f10: '06150102030405060708' });
-    fixture.debugElement.query(By.css('.tags-toggle')).nativeElement.click();
-    fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('not needed');   // 9F26 / 9F27 are listed but not used
   });
 
   it('fills the documented example values with "Use example values"', async () => {

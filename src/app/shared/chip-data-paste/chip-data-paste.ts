@@ -1,16 +1,10 @@
-import { Component, computed, input, output, signal } from '@angular/core';
-import { chipValues, EMV_TAG_NAMES, flattenTlv, parseTlv, tagForField, TlvError } from '../../core/emv/tlv';
-
-export interface ChipDataRow {
-  tag: string;
-  name: string;
-  value: string;
-  used: boolean;
-}
+import { Component, input, output, signal } from '@angular/core';
+import { chipValues, flattenTlv, parseTlv, TlvError } from '../../core/emv/tlv';
 
 /**
  * "Paste chip data": reads raw EMV TLV (e.g. ISO 8583 field 55 from a log or simulator) and
  * emits the values for the fields this form has. Everything happens in the browser.
+ * The filled form fields are the confirmation; only problems (broken data, no usable tags) are shown here.
  *
  *   <app-chip-data-paste [targets]="['tag_9f02', ...]" [example]="..." (filled)="apply($event)" />
  */
@@ -30,12 +24,6 @@ export class ChipDataPaste {
   readonly open = signal(false);
   readonly text = signal('');
   readonly error = signal<string | null>(null);
-  readonly rows = signal<ChipDataRow[]>([]);
-  readonly filledCount = signal(0);
-  readonly missing = signal<string[]>([]);
-  /** The decoded tag list is closed by default, so the form stays in view after "Read and fill". */
-  readonly showTags = signal(false);
-  readonly hasResult = computed(() => this.rows().length > 0);
 
   useExample() {
     this.text.set(this.example());
@@ -54,17 +42,10 @@ export class ChipDataPaste {
 
   read() {
     this.error.set(null);
-    this.rows.set([]);
     try {
-      const tags = flattenTlv(parseTlv(this.text()));
-      const { fields, sources } = chipValues(tags);
+      const { fields } = chipValues(flattenTlv(parseTlv(this.text())));
       const targets = this.targets();
       const values = Object.fromEntries(Object.entries(fields).filter(([name]) => targets.includes(name)));
-      const usedTags = new Set(Object.keys(values).map(name => sources[name]));
-      this.rows.set([...tags].map(([tag, value]) => ({ tag, name: EMV_TAG_NAMES[tag] ?? '', value, used: usedTags.has(tag) })));
-      this.filledCount.set(Object.keys(values).length);
-      // Shown as EMV tags ("8A"), the way testers know them, not as API field names ("tag_8a")
-      this.missing.set(targets.filter(t => !(t in values)).map(t => tagForField(t) ?? t));
       if (Object.keys(values).length === 0) {
         this.error.set('None of the tags in this data are used by this form.');
         return;
