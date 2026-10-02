@@ -39,7 +39,7 @@ describe('ChipDataPaste', () => {
     fixture.detectChanges();
     expect(emitted).toEqual([{ tag_9f02: '000000010000', tag_9f37: '12345678', tag_9f36: '0001' }]);
     expect(el.textContent).toContain('Filled 3 fields');
-    expect(el.textContent).toContain('Still to fill: tag_9f10');
+    expect(el.textContent).toContain('Still to fill: 9F10');
     const rows = Array.from(el.querySelectorAll('tbody tr')).map(r => r.textContent ?? '');
     expect(rows.length).toBe(4);
     expect(rows[0]).toContain('Amount, Authorised');

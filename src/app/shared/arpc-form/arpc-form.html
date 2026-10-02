@@ -2,6 +2,8 @@
   <h2>{{ config.title }}</h2>
   <p class="subtitle" *ngIf="config.subtitle">{{ config.subtitle }}</p>
 
+  <app-chip-data-paste [targets]="chipTargets" [example]="exampleChipData" (filled)="applyChipData($event)"></app-chip-data-paste>
+
   <form #arpcForm="ngForm" (ngSubmit)="submitForm(arpcForm)">
 
     <app-example-values-link (use)="useExampleValues()"></app-example-values-link>

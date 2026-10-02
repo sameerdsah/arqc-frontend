@@ -85,4 +85,15 @@ describe('ArpcGenerator', () => {
     await fixture.whenStable();
     expect(component.arpcRequest).toEqual({ arqc: '37858601E2285A5D', tag_8a: '3030' });
   });
+
+  it('takes the ARQC from tag 9F26 of pasted chip data and leaves the response code to type in', async () => {
+    component.arpcRequest = { arqc: '', tag_8a: '3030' };
+    fixture.debugElement.query(By.css('.toggle')).nativeElement.click();
+    fixture.detectChanges();
+    fixture.debugElement.query(By.css('app-chip-data-paste .link-btn')).nativeElement.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.arpcRequest).toEqual({ arqc: '37858601E2285A5D', tag_8a: '3030' });
+    expect(fixture.nativeElement.textContent).toContain('Still to fill: 8A');
+  });
 });

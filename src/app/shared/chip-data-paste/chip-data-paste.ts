@@ -1,5 +1,5 @@
 import { Component, computed, input, output, signal } from '@angular/core';
-import { chipValues, EMV_TAG_NAMES, flattenTlv, parseTlv, TlvError } from '../../core/emv/tlv';
+import { chipValues, EMV_TAG_NAMES, flattenTlv, parseTlv, tagForField, TlvError } from '../../core/emv/tlv';
 
 export interface ChipDataRow {
   tag: string;
@@ -61,7 +61,8 @@ export class ChipDataPaste {
       const usedTags = new Set(Object.keys(values).map(name => sources[name]));
       this.rows.set([...tags].map(([tag, value]) => ({ tag, name: EMV_TAG_NAMES[tag] ?? '', value, used: usedTags.has(tag) })));
       this.filledCount.set(Object.keys(values).length);
-      this.missing.set(targets.filter(t => !(t in values)));
+      // Shown as EMV tags ("8A"), the way testers know them, not as API field names ("tag_8a")
+      this.missing.set(targets.filter(t => !(t in values)).map(t => tagForField(t) ?? t));
       if (Object.keys(values).length === 0) {
         this.error.set('None of the tags in this data are used by this form.');
         return;

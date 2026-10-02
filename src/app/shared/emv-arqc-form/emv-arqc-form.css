@@ -120,12 +120,6 @@ label,
   margin-top: 0;
 }
 
-.section-head small {
-  font-weight: 400;
-  color: #777;
-  font-size: 0.8rem;
-}
-
 .section-head .link-btn,
 .section-head .link-btn:hover {
   width: auto;

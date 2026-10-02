@@ -8,10 +8,9 @@
 
     <app-example-values-link (use)="useExampleValues()"></app-example-values-link>
 
-    <ng-container *ngFor="let field of fields; let first = first">
+    <ng-container *ngFor="let field of fields">
     <div class="section-head" *ngIf="field.heading">
       <span>{{ field.heading }}</span>
-      <small *ngIf="!first">Usually the same for every test</small>
     </div>
     <div class="form-group">
       <label [for]="field.id">{{ field.label }} *</label>
