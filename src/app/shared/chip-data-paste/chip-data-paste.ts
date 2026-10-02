@@ -33,6 +33,8 @@ export class ChipDataPaste {
   readonly rows = signal<ChipDataRow[]>([]);
   readonly filledCount = signal(0);
   readonly missing = signal<string[]>([]);
+  /** The decoded tag list is closed by default, so the form stays in view after "Read and fill". */
+  readonly showTags = signal(false);
   readonly hasResult = computed(() => this.rows().length > 0);
 
   useExample() {

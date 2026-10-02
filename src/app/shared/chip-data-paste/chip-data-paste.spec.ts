@@ -40,10 +40,29 @@ describe('ChipDataPaste', () => {
     expect(emitted).toEqual([{ tag_9f02: '000000010000', tag_9f37: '12345678', tag_9f36: '0001' }]);
     expect(el.textContent).toContain('Filled 3 fields');
     expect(el.textContent).toContain('Still to fill: 9F10');
+    (el.querySelector('.tags-toggle') as HTMLButtonElement).click();
+    fixture.detectChanges();
     const rows = Array.from(el.querySelectorAll('tbody tr')).map(r => r.textContent ?? '');
     expect(rows.length).toBe(4);
     expect(rows[0]).toContain('Amount, Authorised');
     expect(rows[3]).toContain('not needed');                           // 9F27 is not used by this form
+  });
+
+  it('keeps the decoded tags closed until asked, so the form stays in view', () => {
+    open();
+    (el.querySelector('.link-btn') as HTMLButtonElement).click();    // Use example chip data
+    fixture.detectChanges();
+    const toggle = el.querySelector('.tags-toggle') as HTMLButtonElement;
+    expect(toggle.textContent).toContain('Decoded tags (4)');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(el.querySelector('table')).toBeNull();
+    toggle.click();
+    fixture.detectChanges();
+    expect(el.querySelectorAll('tbody tr').length).toBe(4);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    toggle.click();
+    fixture.detectChanges();
+    expect(el.querySelector('table')).toBeNull();
   });
 
   it('accepts pasted data with spaces and shows clear errors for broken data', () => {
