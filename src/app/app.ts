@@ -31,6 +31,7 @@ import { AmexCscGenerator } from './amex/csc-generator/csc-generator';
 import { AmexCidGenerator } from './amex/cid-generator/cid-generator';
 import { AmexChipCscGenerator } from './amex/chip-csc-generator/chip-csc-generator';
 import { AmexDynamicCscGenerator } from './amex/dynamic-csc-generator/dynamic-csc-generator';
+import { ApiDocsLink } from './shared/api-docs-link/api-docs-link';
 
 type Network = 'discover' | 'mastercard' | 'visa' | 'amex' | null;
 type Tool = string | null;
@@ -153,7 +154,7 @@ function parseUrl(url: string): { network: Network; tool: Tool; valid: boolean }
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, NgComponentOutlet],
+  imports: [CommonModule, NgComponentOutlet, ApiDocsLink],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

@@ -148,4 +148,12 @@ describe('App', () => {
     await go('/discover/arqc/extra');
     expect(router.url).toBe('/');
   });
+
+  it('shows the API Docs link to the documentation on every page', async () => {
+    for (const url of ['/', '/visa', '/mastercard/cvc2']) {
+      await go(url);
+      const link = el.querySelector('app-api-docs-link a') as HTMLAnchorElement;
+      expect(link?.getAttribute('href')).toBe('/api/docs');
+    }
+  });
 });
