@@ -2,6 +2,8 @@
   <h2>{{ config.title }}</h2>
   <p class="subtitle" *ngIf="config.subtitle">{{ config.subtitle }}</p>
 
+  <app-chip-data-paste [targets]="fieldKeys" [example]="exampleChipData" (filled)="applyChipData($event)"></app-chip-data-paste>
+
   <form #arqcForm="ngForm" (ngSubmit)="submitForm(arqcForm)">
 
     <ng-container *ngFor="let field of fields; let first = first">

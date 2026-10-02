@@ -16,6 +16,7 @@ export interface OperationInfo {
   result_format: string;   // e.g. '3 digits'
   result_pattern: string;  // e.g. '^[0-9]{3}$'
   fields: OperationField[];
+  example_result?: string; // result of the example input, e.g. '597'
 }
 
 export interface OperationCatalogue {

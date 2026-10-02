@@ -6,6 +6,8 @@ import {
   groupByNetwork, OperationGroup, OperationInfo, VerifyResult
 } from '../../core/operations/operations.models';
 import { friendlyErrorMessage } from '../../shared/api-error';
+import { ChipDataPaste } from '../../shared/chip-data-paste/chip-data-paste';
+import { exampleChipData } from '../../core/emv/chip-examples';
 
 export interface DiffChar {
   char: string;
@@ -23,6 +25,7 @@ export function compareChars(expected: string, received: string): DiffChar[] {
  */
 @Component({
   selector: 'app-verify-value',
+  imports: [ChipDataPaste],
   templateUrl: './verify-value.html',
   styleUrl: './verify-value.css'
 })
@@ -52,6 +55,20 @@ export class VerifyValue {
   });
   readonly canVerify = computed(() =>
     !!this.selected() && !this.missingFields().length && !!this.received().trim() && !this.receivedInvalid());
+  /** Chip data can fill the inputs and, for ARQC / ARPC, the received value (9F26 / 91). */
+  readonly receivedKey = computed(() => {
+    const type = this.selected()?.type;
+    return type === 'ARQC' ? 'arqc' : type === 'ARPC' ? 'arpc' : null;
+  });
+  readonly chipTargets = computed(() => {
+    const op = this.selected();
+    const key = this.receivedKey();
+    return op ? [...op.fields.map(f => f.name), ...(key ? [key] : [])] : [];
+  });
+  readonly exampleChip = computed(() => {
+    const op = this.selected();
+    return op ? exampleChipData(op) : '';
+  });
   readonly diff = computed(() => {
     const r = this.result();
     return r && !r.valid ? compareChars(r.expected, r.received) : [];
@@ -94,6 +111,20 @@ export class VerifyValue {
       this.values.set(Object.fromEntries(op.fields.map(f => [f.name, f.example])));
       this.clearOutcome();
     }
+  }
+
+  applyChipData(chip: Record<string, string>) {
+    const op = this.selected();
+    if (!op) {
+      return;
+    }
+    const names = new Set(op.fields.map(f => f.name));
+    this.values.update(v => ({ ...v, ...Object.fromEntries(Object.entries(chip).filter(([name]) => names.has(name))) }));
+    const key = this.receivedKey();
+    if (key && chip[key]) {
+      this.received.set(chip[key]);
+    }
+    this.clearOutcome();
   }
 
   isMissing(name: string): boolean {

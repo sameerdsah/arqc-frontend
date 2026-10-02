@@ -1,0 +1,45 @@
+@if (!open()) {
+  <button type="button" class="toggle" (click)="open.set(true)">&#9654; Paste chip data (EMV tags, e.g. field 55)</button>
+} @else {
+  <div class="panel">
+    <div class="head">
+      <label for="chipData">Raw chip data (hex)</label>
+      <span class="actions">
+        @if (example()) {
+          <button type="button" class="link-btn" (click)="useExample()">Use example chip data</button>
+        }
+        <button type="button" class="link-btn" (click)="close()">Close</button>
+      </span>
+    </div>
+    <textarea id="chipData" rows="3" spellcheck="false" autocomplete="off"
+              placeholder="e.g. 9F02 06 000000010000 9F37 04 12345678 9F36 02 0001 ..."
+              [value]="text()" (input)="setText($any($event.target).value)"></textarea>
+    <button type="button" class="read-btn" (click)="read()">Read and fill the form</button>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    } @else if (hasResult()) {
+      <p class="ok">&#10004; Filled {{ filledCount() }} field{{ filledCount() === 1 ? '' : 's' }} from the chip data.
+        @if (missing().length) { <span class="hint">Still to fill: {{ missing().join(', ') }}</span> }
+      </p>
+    }
+
+    @if (hasResult()) {
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Tag</th><th>Name</th><th>Value</th><th></th></tr></thead>
+          <tbody>
+            @for (row of rows(); track row.tag) {
+              <tr [class.unused]="!row.used">
+                <td><code>{{ row.tag }}</code></td>
+                <td>{{ row.name }}</td>
+                <td><code>{{ row.value }}</code></td>
+                <td>{{ row.used ? '✔ used' : 'not needed' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}

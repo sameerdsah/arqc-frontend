@@ -19,6 +19,8 @@
     </div>
 
     @if (selected(); as op) {
+      <app-chip-data-paste [targets]="chipTargets()" [example]="exampleChip()" (filled)="applyChipData($event)"></app-chip-data-paste>
+
       <form (submit)="$event.preventDefault(); verify()">
         <div class="section-head">
           <span>Transaction / card data</span>

@@ -140,4 +140,21 @@ describe('EmvArqcForm', () => {
     expect(fixture.nativeElement.textContent).toContain('Unable to calculate the ARQC');
     expect(fixture.nativeElement.textContent).toContain('Unsupported Visa CVN: 11');
   });
+
+  it('fills the form from pasted chip data (field 55)', async () => {
+    fixture.debugElement.query(By.css('.toggle')).nativeElement.click();
+    fixture.detectChanges();
+    fixture.debugElement.query(By.css('app-chip-data-paste .link-btn')).nativeElement.click();   // Use example chip data
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(value('#tag9F37')).toBe('12345678');
+    expect(value('#tag9F10')).toBe('06010A03A00000');
+    expect(value('#tag9A')).toBe('261001');
+    fixture.debugElement.query(By.css('form')).nativeElement.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+    const req = httpMock.expectOne('/api/visa/arqc');
+    expect(req.request.body.tag_9f02).toBe('000000010000');
+    req.flush({ result: '949BBD6013450C7D', type: 'ARQC' });
+  });
 });

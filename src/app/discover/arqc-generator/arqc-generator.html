@@ -2,6 +2,8 @@
   <h2>{{ title }}</h2>
   <p class="subtitle" *ngIf="subtitle">{{ subtitle }}</p>
 
+  <app-chip-data-paste [targets]="chipTargets" [example]="exampleChipData" (filled)="applyChipData($event)"></app-chip-data-paste>
+
   <form #arqcForm="ngForm" (ngSubmit)="submitForm(arqcForm)">
 
     <div class="form-group">

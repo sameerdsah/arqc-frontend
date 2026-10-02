@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 import { friendlyErrorMessage } from '../api-error';
+import { ChipDataPaste } from '../chip-data-paste/chip-data-paste';
+import { exampleChipDataFor } from '../../core/emv/chip-examples';
 
 /** Settings for one scheme's ARQC page, e.g. Visa or Mastercard. */
 export interface EmvArqcConfig {
@@ -59,7 +61,7 @@ function emvFields(config: EmvArqcConfig, now: Date): EmvField[] {
 /** One reusable ARQC form for the schemes that use the full EMV data set (Visa, Mastercard). */
 @Component({
   selector: 'app-emv-arqc-form',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, ChipDataPaste],
   templateUrl: './emv-arqc-form.html',
   styleUrl: './emv-arqc-form.css'
 })
@@ -68,6 +70,8 @@ export class EmvArqcForm implements OnChanges {
   @Input({ required: true }) config!: EmvArqcConfig;
 
   fields: EmvField[] = [];
+  fieldKeys: string[] = [];
+  exampleChipData = '';
   arqcRequest: Record<string, string> = {};
 
   response: any = null;
@@ -79,6 +83,8 @@ export class EmvArqcForm implements OnChanges {
 
   ngOnChanges() {
     this.fields = emvFields(this.config, new Date());
+    this.fieldKeys = this.fields.map(f => f.key);
+    this.exampleChipData = exampleChipDataFor(this.fields.map(f => ({ name: f.key, example: f.example })), [['9F27', '80']]);
     // Transaction data starts empty; terminal and card data starts with typical test values
     this.arqcRequest = Object.fromEntries(this.fields.map(f => [f.key, f.preset ?? '']));
     this.clearResult();
@@ -87,6 +93,12 @@ export class EmvArqcForm implements OnChanges {
   /** Fills all 11 fields with the documented test values (they give the documented ARQC). */
   useExampleValues() {
     this.arqcRequest = Object.fromEntries(this.fields.map(f => [f.key, f.example]));
+    this.clearResult();
+  }
+
+  /** Values read from pasted chip data (field 55) replace the matching fields. */
+  applyChipData(values: Record<string, string>) {
+    this.arqcRequest = { ...this.arqcRequest, ...values };
     this.clearResult();
   }
 

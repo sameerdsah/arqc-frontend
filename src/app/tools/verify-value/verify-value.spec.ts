@@ -12,6 +12,7 @@ const CATALOGUE: OperationCatalogue = {
       fields: [{ name: 'pan', label: 'Tag 5A (PAN)', example: '4111111111111111' },
                { name: 'expiry', label: 'Expiry Date (YYMM)', example: '3012' }] },
     { id: 'visa/arpc', network: 'visa', network_label: 'Visa', label: 'Visa ARPC', type: 'ARPC', path: '/api/visa/arpc',
+      example_result: 'C837D13061C1E896',
       result_format: '16 hex characters', result_pattern: '^[0-9A-F]{16}$',
       fields: [{ name: 'arqc', label: 'Tag 9F26 (ARQC)', example: '37858601E2285A5D' },
                { name: 'tag_8a', label: 'Tag 8A (Authorisation Response Code)', example: '3030' }] }
@@ -116,5 +117,17 @@ describe('VerifyValue', () => {
 
   it('marks differing characters', () => {
     expect(compareChars('ABCD', 'ABXD').map(c => c.same)).toEqual([true, true, false, true]);
+  });
+
+  it('fills the inputs and the received ARPC from pasted chip data', () => {
+    component.select('visa/arpc');
+    fixture.detectChanges();
+    (el.querySelector('.toggle') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    (el.querySelector('app-chip-data-paste .link-btn') as HTMLButtonElement).click();   // example: 9F26, 8A, 91
+    fixture.detectChanges();
+    expect(component.values()).toEqual({ arqc: '37858601E2285A5D', tag_8a: '3030' });
+    expect(component.received()).toBe('C837D13061C1E896');
+    expect(component.canVerify()).toBe(true);
   });
 });
