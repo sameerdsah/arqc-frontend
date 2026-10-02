@@ -1,0 +1,78 @@
+<div class="container">
+  <h2>Verify a Value</h2>
+  <p class="subtitle">Check a value received from a card, terminal or simulator</p>
+
+  @if (loadError()) {
+    <p class="response-error"><strong>Unable to load the list of values</strong><br><small>{{ loadError() }}</small></p>
+  } @else {
+    <div class="form-group">
+      <label for="operation">Value to verify *</label>
+      <select id="operation" [value]="selectedId()" (change)="select($any($event.target).value)">
+        @for (group of groups(); track group.label) {
+          <optgroup [label]="group.label">
+            @for (op of group.operations; track op.id) {
+              <option [value]="op.id" [selected]="op.id === selectedId()">{{ op.label }}</option>
+            }
+          </optgroup>
+        }
+      </select>
+    </div>
+
+    @if (selected(); as op) {
+      <form (submit)="$event.preventDefault(); verify()">
+        <div class="section-head">
+          <span>Transaction / card data</span>
+          <button type="button" class="link-btn" (click)="useExampleValues()">Use example values</button>
+        </div>
+
+        @for (field of op.fields; track field.name) {
+          <div class="form-group">
+            <label [for]="'f-' + field.name">{{ field.label }} *</label>
+            <input type="text" [id]="'f-' + field.name" [name]="field.name" autocomplete="off" spellcheck="false"
+                   [value]="values()[field.name] ?? ''" (input)="setValue(field.name, $any($event.target).value)"
+                   [placeholder]="field.example">
+            @if (isMissing(field.name)) {
+              <div class="error">This field is required</div>
+            }
+          </div>
+        }
+
+        <div class="form-group received">
+          <label for="received">Received {{ op.type }} * <span class="hint">({{ op.result_format }})</span></label>
+          <input type="text" id="received" name="received" autocomplete="off" spellcheck="false"
+                 [value]="received()" (input)="setReceived($any($event.target).value)">
+          @if (submitted() && !received().trim()) {
+            <div class="error">This field is required</div>
+          } @else if (receivedInvalid()) {
+            <div class="error">Please enter {{ op.result_format }}</div>
+          }
+        </div>
+
+        <button type="submit" [disabled]="busy()" [class.btn-disabled-look]="!canVerify() || busy()">
+          {{ busy() ? 'Verifying...' : 'Verify' }}
+        </button>
+      </form>
+
+      @if (result(); as r) {
+        @if (r.valid) {
+          <div class="outcome ok" role="status">
+            <strong>&#10004; Match</strong> &ndash; the received {{ r.type }} is correct.
+            <div class="values"><span>Value</span><code>{{ r.received }}</code></div>
+          </div>
+        } @else {
+          <div class="outcome bad" role="status">
+            <strong>&#10008; No match</strong> &ndash; the received {{ r.type }} is not the expected value.
+            <div class="values"><span>Expected</span><code>{{ r.expected }}</code></div>
+            <div class="values"><span>Received</span>
+              <code>@for (c of diff(); track $index) {<span [class.diff]="!c.same">{{ c.char }}</span>}</code>
+            </div>
+            <small>Differences are highlighted. Check the input data, the cryptogram version and the key.</small>
+          </div>
+        }
+      }
+      @if (error()) {
+        <p class="response-error"><strong>Unable to verify the {{ op.type }}</strong><br><small>{{ error() }}</small></p>
+      }
+    }
+  }
+</div>

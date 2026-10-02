@@ -2,11 +2,12 @@
 
 <div class="page">
 
-  <div class="selector-container" *ngIf="!selectedNetwork">
+  <div class="selector-container" *ngIf="!selectedNetwork && !selectedTestingTool">
     <h1>Select Card Network</h1>
     <div class="network-options">
       <button class="network-btn" *ngFor="let network of networks" (click)="selectNetwork(network)">{{ networkConfig[network].label }}</button>
     </div>
+    <app-testing-tools-menu></app-testing-tools-menu>
   </div>
 
   <div class="selector-container" *ngIf="selectedNetwork && !selectedTool">

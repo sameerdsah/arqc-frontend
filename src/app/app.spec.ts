@@ -156,4 +156,19 @@ describe('App', () => {
       expect(link?.getAttribute('href')).toBe('/api/docs');
     }
   });
+
+  it('shows the testing tools on the start page and opens them by address', async () => {
+    expect(el.querySelector('app-testing-tools-menu')).toBeTruthy();
+    expect(buttonLabels()).toEqual(['Discover', 'Mastercard', 'Visa', 'American Express']);  // tools are separate
+
+    await go('/tools/verify');
+    expect(el.querySelector('app-verify-value')).toBeTruthy();
+    expect(el.querySelector('app-testing-tools-menu')).toBeNull();
+
+    await go('/tools/batch');
+    expect(el.querySelector('app-batch-generation')).toBeTruthy();
+
+    await go('/tools/unknown');
+    expect(router.url).toBe('/');
+  });
 });

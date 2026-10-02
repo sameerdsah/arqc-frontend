@@ -32,6 +32,8 @@ import { AmexCidGenerator } from './amex/cid-generator/cid-generator';
 import { AmexChipCscGenerator } from './amex/chip-csc-generator/chip-csc-generator';
 import { AmexDynamicCscGenerator } from './amex/dynamic-csc-generator/dynamic-csc-generator';
 import { ApiDocsLink } from './shared/api-docs-link/api-docs-link';
+import { TestingToolsMenu } from './tools/testing-tools-menu/testing-tools-menu';
+import { findTestingTool } from './tools/testing-tools';
 
 type Network = 'discover' | 'mastercard' | 'visa' | 'amex' | null;
 type Tool = string | null;
@@ -139,22 +141,34 @@ const PAGE_COMPONENTS: Record<string, Type<unknown>> = {
   'amex/dynamic-csc': AmexDynamicCscGenerator
 };
 
-// Turns an address like /discover/cvv into { network, tool, valid }
-function parseUrl(url: string): { network: Network; tool: Tool; valid: boolean } {
+interface ParsedUrl {
+  network: Network;
+  tool: Tool;
+  testingTool: string | null;   // /tools/verify, /tools/batch
+  valid: boolean;
+}
+
+// Turns an address like /discover/cvv or /tools/verify into { network, tool, testingTool, valid }
+function parseUrl(url: string): ParsedUrl {
   const path = url.split(/[?#]/)[0];
   const segments = path.split('/').filter(Boolean).map(s => s.toLowerCase());
   const [networkPart, toolPart] = segments;
+
+  if (networkPart === 'tools') {
+    const testingTool = segments.length === 2 ? findTestingTool(toolPart) : null;
+    return { network: null, tool: null, testingTool: testingTool?.slug ?? null, valid: !!testingTool };
+  }
 
   const network = NETWORKS.includes(networkPart as Exclude<Network, null>) ? (networkPart as Network) : null;
   const tool = network && NETWORK_CONFIG[network].tools.some(t => t.slug === toolPart) ? toolPart : null;
   const valid = segments.length <= 2 && (!networkPart || !!network) && (!toolPart || !!tool);
 
-  return valid ? { network, tool, valid } : { network: null, tool: null, valid };
+  return valid ? { network, tool, testingTool: null, valid } : { network: null, tool: null, testingTool: null, valid };
 }
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, NgComponentOutlet, ApiDocsLink],
+  imports: [CommonModule, NgComponentOutlet, ApiDocsLink, TestingToolsMenu],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -184,6 +198,10 @@ export class App {
 
   get selectedTool(): Tool {
     return this.route().tool;
+  }
+
+  get selectedTestingTool(): string | null {
+    return this.route().testingTool;
   }
 
   get selectedNetworkConfig(): NetworkConfig | null {
@@ -216,7 +234,10 @@ export class App {
 
   // The component for the current address, or null (start page, network page, or not built yet)
   readonly pageComponent = computed<Type<unknown> | null>(() => {
-    const { network, tool } = this.route();
+    const { network, tool, testingTool } = this.route();
+    if (testingTool) {
+      return findTestingTool(testingTool)?.component ?? null;
+    }
     return network && tool ? PAGE_COMPONENTS[`${network}/${tool}`] ?? null : null;
   });
 

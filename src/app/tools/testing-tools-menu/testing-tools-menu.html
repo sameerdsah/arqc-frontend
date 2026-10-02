@@ -1,0 +1,9 @@
+<h2 class="tools-heading">Testing Tools</h2>
+<div class="tools">
+  @for (tool of tools; track tool.slug) {
+    <button type="button" class="tool-btn" (click)="open(tool.slug)" [title]="tool.description">
+      <span class="tool-label">{{ tool.label }}</span>
+      <span class="tool-desc">{{ tool.description }}</span>
+    </button>
+  }
+</div>

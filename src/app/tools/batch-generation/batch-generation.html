@@ -1,0 +1,98 @@
+<div class="container">
+  <h2>Batch Generation</h2>
+  <p class="subtitle">Generate or verify up to {{ maxItems() }} values at once from a CSV file</p>
+
+  @if (loadError()) {
+    <p class="response-error"><strong>Unable to load the list of values</strong><br><small>{{ loadError() }}</small></p>
+  } @else {
+    <ol class="steps">
+      <li>
+        <label for="operation">Choose the value</label>
+        <div class="row">
+          <select id="operation" (change)="select($any($event.target).value)">
+            @for (group of groups(); track group.label) {
+              <optgroup [label]="group.label">
+                @for (op of group.operations; track op.id) {
+                  <option [value]="op.id" [selected]="op.id === selectedId()">{{ op.label }}</option>
+                }
+              </optgroup>
+            }
+          </select>
+          <button type="button" class="secondary" (click)="downloadTemplate()" [disabled]="!selected()">Download CSV template</button>
+        </div>
+        @if (selected(); as op) {
+          <p class="hint">Columns: <code>ref</code>, @for (f of op.fields; track f.name) {<code>{{ f.name }}</code>, }<code>received</code>.
+            Fill <code>received</code> to verify a value instead of only generating it; <code>ref</code> is your own reference.</p>
+        }
+      </li>
+
+      <li>
+        <label for="csvFile">Upload your CSV file</label>
+        <div class="row">
+          <input type="file" id="csvFile" accept=".csv,text/csv" (change)="onFileSelected($event)">
+          <button type="button" class="link-btn" (click)="loadSampleRows()">or try with sample rows</button>
+        </div>
+        @if (fileError()) {
+          <p class="error">{{ fileError() }}</p>
+        }
+        @if (parsed(); as p) {
+          @if (p.errors.length) {
+            @for (e of p.errors; track e) { <p class="error">{{ e }}</p> }
+          } @else {
+            <p class="ready">&#10004; {{ p.items.length }} row{{ p.items.length === 1 ? '' : 's' }} ready from {{ sourceName() }}</p>
+          }
+          @if (p.ignoredColumns.length) {
+            <p class="hint">Ignored column(s): {{ p.ignoredColumns.join(', ') }}</p>
+          }
+        }
+      </li>
+
+      <li>
+        <button type="button" class="primary" (click)="run()" [disabled]="busy()" [class.btn-disabled-look]="!ready() || busy()">
+          {{ busy() ? 'Running...' : 'Run batch' }}
+        </button>
+      </li>
+    </ol>
+
+    @if (error()) {
+      <p class="response-error"><strong>Unable to run the batch</strong><br><small>{{ error() }}</small></p>
+    }
+
+    @if (result(); as r) {
+      <div class="summary" role="status">
+        <span class="chip">Total <b>{{ r.summary.total }}</b></span>
+        <span class="chip ok">Calculated <b>{{ r.summary.succeeded }}</b></span>
+        @if (r.summary.matched !== undefined) {
+          <span class="chip ok">Match <b>{{ r.summary.matched }}</b></span>
+          <span class="chip bad">No match <b>{{ r.summary.mismatched }}</b></span>
+        }
+        <span class="chip" [class.bad]="r.summary.failed > 0">Errors <b>{{ r.summary.failed }}</b></span>
+        <button type="button" class="secondary" (click)="downloadResults()">Download results (CSV)</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Ref</th><th>{{ r.type }}</th><th>Received</th><th>Status</th></tr></thead>
+          <tbody>
+            @for (item of r.results; track item.index) {
+              <tr>
+                <td>{{ item.index + 1 }}</td>
+                <td>{{ item.ref }}</td>
+                <td><code>{{ item.result }}</code></td>
+                <td><code>{{ item.received }}</code></td>
+                <td>
+                  @switch (status(item)) {
+                    @case ('MATCH') { <span class="badge ok">&#10004; Match</span> }
+                    @case ('MISMATCH') { <span class="badge bad">&#10008; No match</span> }
+                    @case ('GENERATED') { <span class="badge">Generated</span> }
+                    @default { <span class="badge bad">Error</span> <small class="err">{{ item.error }}</small> }
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>
