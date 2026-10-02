@@ -1,11 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
-import { EmvArqcForm, EmvArqcConfig } from './emv-arqc-form';
+import { EmvArqcForm, EmvArqcConfig, todayYymmdd } from './emv-arqc-form';
 
 const CONFIG: EmvArqcConfig = {
   title: 'ARQC Generator', subtitle: 'Authorization Request Cryptogram (9F26)',
-  apiUrl: '/api/visa/arqc', iadPattern: '^(?:[0-9A-Fa-f]{2}){7,32}$'
+  apiUrl: '/api/visa/arqc', iadPattern: '^(?:[0-9A-Fa-f]{2}){7,32}$',
+  aip: '3C00', exampleIad: '06010A03A00000'
 };
 
 const VALID_ARQC_INPUT: Record<string, string> = {
@@ -54,12 +55,60 @@ describe('EmvArqcForm', () => {
     fixture.detectChanges();
   }
 
-  it('shows all 11 EMV fields in CDOL1 order', () => {
+  function value(selector: string): string {
+    return (fixture.nativeElement.querySelector(selector) as HTMLInputElement).value;
+  }
+
+  it('shows all 11 EMV fields: transaction data first, then terminal and card data', () => {
     const labels = Array.from(fixture.nativeElement.querySelectorAll('label')).map((l: any) => l.textContent.trim());
     expect(labels.length).toBe(11);
-    expect(labels[0]).toContain('9F02');
-    expect(labels[3]).toContain('Tag 95');
-    expect(labels[10]).toContain('9F10');
+    expect(labels.slice(0, 4).map(l => l.split(' ')[1])).toEqual(['9F02', '9F37', '9F36', '9F10']);
+    expect(labels[4]).toContain('9F03');
+    const headings = Array.from(fixture.nativeElement.querySelectorAll('.section-head span')).map((h: any) => h.textContent.trim());
+    expect(headings).toEqual(['Transaction data', 'Terminal and card data']);
+  });
+
+  it('pre-fills the terminal and card data with typical test values and leaves the transaction data empty', () => {
+    expect(value('#tag9F02')).toBe('');
+    expect(value('#tag9F10')).toBe('');
+    expect(value('#tag9F03')).toBe('000000000000');
+    expect(value('#tag9F1A')).toBe('0826');
+    expect(value('#tag5F2A')).toBe('0826');
+    expect(value('#tag95')).toBe('0000000000');
+    expect(value('#tag9A')).toBe(todayYymmdd());
+    expect(value('#tag9C')).toBe('00');
+    expect(value('#tag82')).toBe('3C00');
+  });
+
+  it('needs only the four transaction fields to calculate', async () => {
+    await fillAndSubmit({ '#tag9F02': '000000010000', '#tag9F37': '12345678', '#tag9F36': '0001', '#tag9F10': '06010A03A00000' });
+    const req = httpMock.expectOne('/api/visa/arqc');
+    expect(Object.keys(req.request.body).length).toBe(11);
+    expect(req.request.body.tag_9a).toBe(todayYymmdd());
+    expect(req.request.body.tag_82).toBe('3C00');
+    req.flush({ result: '0000000000000000', type: 'ARQC' });
+  });
+
+  it('fills all fields with the documented example values', async () => {
+    (fixture.nativeElement.querySelector('.link-btn') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(value('#tag9A')).toBe('261001');
+    fixture.debugElement.query(By.css('form')).nativeElement.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+    const req = httpMock.expectOne('/api/visa/arqc');
+    expect(req.request.body).toEqual({
+      tag_9f02: '000000010000', tag_9f37: '12345678', tag_9f36: '0001', tag_9f10: '06010A03A00000',
+      tag_9f03: '000000000000', tag_9f1a: '0826', tag_95: '0000000000', tag_5f2a: '0826',
+      tag_9a: '261001', tag_9c: '00', tag_82: '3C00'
+    });
+    req.flush({ result: '949BBD6013450C7D', type: 'ARQC' });
+  });
+
+  it('formats today as YYMMDD for tag 9A', () => {
+    expect(todayYymmdd(new Date(2026, 9, 2))).toBe('261002');
+    expect(todayYymmdd(new Date(2030, 0, 9))).toBe('300109');
   });
 
   it('does not send a request when a field has the wrong format', async () => {

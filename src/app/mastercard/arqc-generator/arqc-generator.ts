@@ -18,6 +18,8 @@ export class MastercardArqcGenerator {
     title: 'ARQC Generator',
     subtitle: 'Authorization Request Cryptogram (9F26) — M/Chip',
     apiUrl: '/api/mastercard/arqc',
-    iadPattern: '^(?:[0-9A-Fa-f]{2}){8,32}$'
+    iadPattern: '^(?:[0-9A-Fa-f]{2}){8,32}$',
+    aip: '1800',
+    exampleIad: '0110A00003220000000000000000000000FF'
   };
 }

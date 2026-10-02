@@ -101,3 +101,42 @@ label,
 .error {
   text-align: left;
 }
+
+/* Two groups: transaction data (typed every time) and terminal/card data (pre-filled) */
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 18px 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e3e8ef;
+  font-weight: 600;
+  color: #555;
+}
+
+.section-head:first-of-type {
+  margin-top: 0;
+}
+
+.section-head small {
+  font-weight: 400;
+  color: #777;
+  font-size: 0.8rem;
+}
+
+.section-head .link-btn,
+.section-head .link-btn:hover {
+  width: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.section-head .link-btn:hover {
+  text-decoration: underline;
+}

@@ -4,7 +4,13 @@
 
   <form #arqcForm="ngForm" (ngSubmit)="submitForm(arqcForm)">
 
-    <div class="form-group" *ngFor="let field of fields">
+    <ng-container *ngFor="let field of fields; let first = first">
+    <div class="section-head" *ngIf="field.heading">
+      <span>{{ field.heading }}</span>
+      <button type="button" class="link-btn" *ngIf="first" (click)="useExampleValues()">Use example values</button>
+      <small *ngIf="!first">Pre-filled with typical test values &ndash; change them if your test needs to</small>
+    </div>
+    <div class="form-group">
       <label [for]="field.id">{{ field.label }} *</label>
       <input type="text" [id]="field.id" [name]="field.key" [(ngModel)]="arqcRequest[field.key]" #ctrl="ngModel" required [pattern]="field.pattern">
       <div class="error" *ngIf="ctrl.invalid && (ctrl.dirty || arqcForm.submitted)">
@@ -12,6 +18,7 @@
         <span *ngIf="ctrl.errors?.['pattern']">{{ field.message }}</span>
       </div>
     </div>
+    </ng-container>
 
     <button
       type="submit"
