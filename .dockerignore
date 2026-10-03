@@ -1,0 +1,11 @@
+# Files the Docker build must NOT copy in with "COPY . .".
+# Jenkins runs the unit tests in this same folder first, so it contains node_modules (~250 MB)
+# and test output. Without this file they were copied over the node_modules the image had just
+# installed - slow, and the cause of the failed build #20.
+node_modules
+dist
+.angular
+.git
+.vscode
+*.txt
+npm-debug.log
