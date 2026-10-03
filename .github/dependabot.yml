@@ -1,0 +1,33 @@
+# Dependabot: GitHub opens a pull request when a library or base image has a newer version.
+# Security fixes come as soon as they are published (enable "Dependabot security updates" in
+# Settings -> Code security). Pull requests do not deploy anything: Jenkins builds main only,
+# so an update goes live only after it is merged - and then through the tests and scans.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # All Angular packages move together (one pull request), so versions never mismatch.
+      angular:
+        patterns: ["@angular/*", "@angular-devkit/*"]
+      other-dependencies:
+        patterns: ["*"]
+        exclude-patterns: ["@angular/*", "@angular-devkit/*"]
+    ignore:
+      # A new Angular major version is a planned upgrade, not a routine update.
+      - dependency-name: "@angular/*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "deps"
+
+  - package-ecosystem: docker      # node and nginx base images in the Dockerfile
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "deps"
