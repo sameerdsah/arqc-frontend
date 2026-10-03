@@ -60,6 +60,11 @@
   text-align: center;
 }
 
+/* Batch results are a table with up to six columns: give them room */
+.arqc-wrapper.wide {
+  max-width: 920px;
+}
+
 .network-platform {
   text-align: center;
   color: #666;

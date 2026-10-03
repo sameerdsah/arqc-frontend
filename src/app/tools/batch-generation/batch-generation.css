@@ -56,3 +56,7 @@ th { position: sticky; top: 0; background: #f6f8fb; }
 .cause.none { font-weight: 400; color: #667085; }
 .maybe { font-weight: 400; color: #8a5300; }
 .fix { display: block; color: #475467; font-family: 'Courier New', Courier, monospace; white-space: nowrap; }
+
+/* The page is wide for the results table; the steps keep the usual form width */
+.subtitle, .steps, .response-error { max-width: 480px; margin-left: auto; margin-right: auto; }
+.steps { padding-left: 20px; }

@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <div class="arqc-wrapper" *ngIf="pageComponent() as page">
+  <div class="arqc-wrapper" [class.wide]="selectedTestingTool === 'batch'" *ngIf="pageComponent() as page">
     <ng-container *ngComponentOutlet="page"></ng-container>
   </div>
 
