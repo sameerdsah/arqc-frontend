@@ -18,9 +18,15 @@ updates:
         patterns: ["*"]
         exclude-patterns: ["@angular/*", "@angular-devkit/*"]
     ignore:
-      # A new Angular major version is a planned upgrade, not a routine update.
-      - dependency-name: "@angular/*"
+      # New major versions (Angular, TypeScript, Vitest, jsdom, ...) are planned upgrades, done
+      # together with an Angular upgrade - not weekly pull requests. Minor and patch updates and
+      # security fixes still come automatically.
+      - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      # Angular supports only specific TypeScript versions (e.g. 6.0.x), so TypeScript moves
+      # only when Angular moves.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-minor"]
     commit-message:
       prefix: "deps"
 
@@ -29,5 +35,9 @@ updates:
     schedule:
       interval: weekly
       day: monday
+    ignore:
+      # Node major versions follow the Angular support list and the Jenkins test image (node:24).
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "deps"
