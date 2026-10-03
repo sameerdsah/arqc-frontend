@@ -6,13 +6,14 @@ import { BatchGeneration } from './batch-generation/batch-generation';
 export interface TestingTool {
   slug: string;
   label: string;
+  shortLabel: string;     // header link, e.g. 'Verify'
   description: string;
   component: Type<unknown>;
 }
 
 export const TESTING_TOOLS: TestingTool[] = [
-  { slug: 'verify', label: 'Verify a Value', description: 'Check an ARQC, ARPC or CVV you received: Match or No match, and the likely cause', component: VerifyValue },
-  { slug: 'batch', label: 'Batch Generation', description: 'Generate or verify up to 500 values from a CSV file', component: BatchGeneration }
+  { slug: 'verify', label: 'Verify a Value', shortLabel: 'Verify', description: 'Check an ARQC, ARPC or CVV you received: Match or No match, and the likely cause', component: VerifyValue },
+  { slug: 'batch', label: 'Batch Generation', shortLabel: 'Batch', description: 'Generate or verify up to 500 values from a CSV file', component: BatchGeneration }
 ];
 
 export function findTestingTool(slug: string | undefined): TestingTool | null {

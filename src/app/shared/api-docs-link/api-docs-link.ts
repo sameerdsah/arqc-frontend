@@ -5,7 +5,7 @@ export function isDesktopApp(userAgent: string = typeof navigator !== 'undefined
   return /\bElectron\//.test(userAgent);
 }
 
-/** Small "API Docs" link, top right of every page. Opens the Swagger documentation in a new tab.
+/** Small "API Docs" link, at the right of the header on every page. Opens the Swagger documentation in a new tab.
  *  Hidden in the desktop app, where the documentation page cannot load offline. */
 @Component({
   selector: 'app-api-docs-link',

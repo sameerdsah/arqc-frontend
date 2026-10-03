@@ -1,6 +1,7 @@
-import { Component, Type, computed, inject } from '@angular/core';
+import { Component, Type, computed, effect, inject } from '@angular/core';
 import { CommonModule, NgComponentOutlet } from '@angular/common';
 import { Router, NavigationEnd } from '@angular/router';
+import { Title } from '@angular/platform-browser';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs/operators';
 // Discover
@@ -31,82 +32,14 @@ import { AmexCscGenerator } from './amex/csc-generator/csc-generator';
 import { AmexCidGenerator } from './amex/cid-generator/cid-generator';
 import { AmexChipCscGenerator } from './amex/chip-csc-generator/chip-csc-generator';
 import { AmexDynamicCscGenerator } from './amex/dynamic-csc-generator/dynamic-csc-generator';
-import { ApiDocsLink } from './shared/api-docs-link/api-docs-link';
+import { AppHeader } from './shared/app-header/app-header';
+import { PageNav } from './shared/page-nav/page-nav';
 import { TestingToolsMenu } from './tools/testing-tools-menu/testing-tools-menu';
 import { findTestingTool } from './tools/testing-tools';
-
-type Network = 'discover' | 'mastercard' | 'visa' | 'amex' | null;
-type Tool = string | null;
-
-// One entry per button on a network page. `slug` is the address (e.g. /mastercard/cvc2),
-// `label` is the button text and `name` is the full name shown as the page subtitle.
-interface ToolOption {
-  slug: string;
-  label: string;
-  name: string;
-}
-
-interface NetworkConfig {
-  label: string;
-  platform: string;
-  tools: ToolOption[];
-}
-
-// Each network lists the same six kinds of value, in the same order, using that
-// network's own names: chip cryptogram, issuer response, stripe value,
-// printed value, chip value (service code 999) and contactless dynamic value.
-const NETWORK_CONFIG: Record<Exclude<Network, null>, NetworkConfig> = {
-  discover: {
-    label: 'Discover',
-    platform: 'D-PAS',
-    tools: [
-      { slug: 'arqc', label: 'ARQC', name: 'Authorization Request Cryptogram (9F26)' },
-      { slug: 'arpc', label: 'ARPC', name: 'Authorization Response Cryptogram' },
-      { slug: 'cvv', label: 'CVV', name: 'Card Verification Value (magnetic stripe)' },
-      { slug: 'cid', label: 'CID', name: 'Card Identification Number (printed on the card)' },
-      { slug: 'icvv', label: 'iCVV', name: 'Integrated Card Verification Value (stored in the chip)' },
-      { slug: 'dcvv', label: 'DCVV', name: 'Dynamic Card Verification Value (contactless)' }
-    ]
-  },
-  mastercard: {
-    label: 'Mastercard',
-    platform: 'M/Chip',
-    tools: [
-      { slug: 'arqc', label: 'ARQC', name: 'Authorization Request Cryptogram (9F26)' },
-      { slug: 'arpc', label: 'ARPC', name: 'Authorization Response Cryptogram' },
-      { slug: 'cvc1', label: 'CVC1', name: 'Card Validation Code 1 (magnetic stripe)' },
-      { slug: 'cvc2', label: 'CVC2', name: 'Card Validation Code 2 (printed on the card)' },
-      { slug: 'chip-cvc', label: 'Chip CVC', name: 'Chip Card Validation Code (stored in the chip)' },
-      { slug: 'cvc3', label: 'CVC3', name: 'Dynamic Card Validation Code (contactless)' }
-    ]
-  },
-  visa: {
-    label: 'Visa',
-    platform: 'VSDC / qVSDC',
-    tools: [
-      { slug: 'arqc', label: 'ARQC', name: 'Authorization Request Cryptogram (9F26)' },
-      { slug: 'arpc', label: 'ARPC', name: 'Authorization Response Cryptogram' },
-      { slug: 'cvv', label: 'CVV', name: 'Card Verification Value (magnetic stripe)' },
-      { slug: 'cvv2', label: 'CVV2', name: 'Card Verification Value 2 (printed on the card)' },
-      { slug: 'icvv', label: 'iCVV', name: 'Integrated Card Verification Value (stored in the chip)' },
-      { slug: 'dcvv', label: 'dCVV', name: 'Dynamic Card Verification Value (contactless)' }
-    ]
-  },
-  amex: {
-    label: 'American Express',
-    platform: 'AEIPS / Expresspay',
-    tools: [
-      { slug: 'arqc', label: 'ARQC', name: 'Authorization Request Cryptogram (9F26)' },
-      { slug: 'arpc', label: 'ARPC', name: 'Authorization Response Cryptogram' },
-      { slug: 'csc', label: 'CSC', name: 'Card Security Code (magnetic stripe)' },
-      { slug: 'cid', label: 'CID', name: 'Card Identification Number (4 digits, printed on the front)' },
-      { slug: 'chip-csc', label: 'Chip CSC', name: 'Chip Card Security Code (stored in the chip)' },
-      { slug: 'dynamic-csc', label: 'Dynamic CSC', name: 'Expresspay dynamic value (contactless)' }
-    ]
-  }
-};
-
-const NETWORKS: Exclude<Network, null>[] = ['discover', 'mastercard', 'visa', 'amex'];
+import {
+  breadcrumb, headerLinks, Network, NETWORK_CONFIG, NetworkConfig, NETWORKS, pageTitle, parseUrl, Tool, ToolOption,
+  valueSwitcher
+} from './navigation/navigation';
 
 // Which page (component) is shown for each address, e.g. /visa/cvv2.
 // Each network has its own folder with one sub-folder per page.
@@ -141,34 +74,9 @@ const PAGE_COMPONENTS: Record<string, Type<unknown>> = {
   'amex/dynamic-csc': AmexDynamicCscGenerator
 };
 
-interface ParsedUrl {
-  network: Network;
-  tool: Tool;
-  testingTool: string | null;   // /tools/verify, /tools/batch
-  valid: boolean;
-}
-
-// Turns an address like /discover/cvv or /tools/verify into { network, tool, testingTool, valid }
-function parseUrl(url: string): ParsedUrl {
-  const path = url.split(/[?#]/)[0];
-  const segments = path.split('/').filter(Boolean).map(s => s.toLowerCase());
-  const [networkPart, toolPart] = segments;
-
-  if (networkPart === 'tools') {
-    const testingTool = segments.length === 2 ? findTestingTool(toolPart) : null;
-    return { network: null, tool: null, testingTool: testingTool?.slug ?? null, valid: !!testingTool };
-  }
-
-  const network = NETWORKS.includes(networkPart as Exclude<Network, null>) ? (networkPart as Network) : null;
-  const tool = network && NETWORK_CONFIG[network].tools.some(t => t.slug === toolPart) ? toolPart : null;
-  const valid = segments.length <= 2 && (!networkPart || !!network) && (!toolPart || !!tool);
-
-  return valid ? { network, tool, testingTool: null, valid } : { network: null, tool: null, testingTool: null, valid };
-}
-
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, NgComponentOutlet, ApiDocsLink, TestingToolsMenu],
+  imports: [CommonModule, NgComponentOutlet, AppHeader, PageNav, TestingToolsMenu],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -190,6 +98,12 @@ export class App {
   );
 
   private route = computed(() => parseUrl(this.currentUrl()));
+
+  // Navigation, all derived from the address and the site map (navigation.ts)
+  readonly header = computed(() => headerLinks(this.route()));
+  readonly crumbs = computed(() => breadcrumb(this.route()));
+  readonly switcher = computed(() => valueSwitcher(this.route()));
+  readonly isHome = computed(() => !this.route().network && !this.route().testingTool);
 
   // The page shown is always worked out from the address bar
   get selectedNetwork(): Network {
@@ -222,6 +136,10 @@ export class App {
   }
 
   constructor() {
+    // Browser tab title follows the page, e.g. "Visa ARQC · Cryptogram Generator"
+    const title = inject(Title);
+    effect(() => title.setTitle(pageTitle(this.route())));
+
     // Unknown address (e.g. /abc or /discover/xyz) -> go to the start page
     this.router.events
       .pipe(filter(e => e instanceof NavigationEnd), takeUntilDestroyed())
@@ -251,13 +169,5 @@ export class App {
       return;
     }
     this.router.navigate(['/', this.selectedNetwork, tool]);
-  }
-
-  goBackToNetworks() {
-    this.router.navigate(['/']);
-  }
-
-  goBackToTools() {
-    this.router.navigate(this.selectedNetwork ? ['/', this.selectedNetwork] : ['/']);
   }
 }

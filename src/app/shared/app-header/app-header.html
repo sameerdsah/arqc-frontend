@@ -1,0 +1,17 @@
+<header class="bar">
+  <a class="brand" routerLink="/" [attr.aria-current]="homeActive() ? 'page' : null" title="Home - all card networks">
+    <span class="mark" aria-hidden="true"></span>Cryptogram Generator
+  </a>
+  <nav class="links" aria-label="Main">
+    @for (link of networks(); track link.url) {
+      <a [routerLink]="link.url" [class.active]="link.active" [attr.aria-current]="link.active ? 'page' : null"
+         [title]="link.title ?? ''">{{ link.label }}</a>
+    }
+    <span class="divider" aria-hidden="true"></span>
+    @for (link of tools(); track link.url) {
+      <a [routerLink]="link.url" [class.active]="link.active" [attr.aria-current]="link.active ? 'page' : null"
+         [title]="link.title ?? ''">{{ link.label }}</a>
+    }
+  </nav>
+  <app-api-docs-link class="docs"></app-api-docs-link>
+</header>

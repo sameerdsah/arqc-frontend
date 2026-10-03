@@ -18,3 +18,8 @@ body::-webkit-scrollbar {
   font-size: 0.9rem;
   margin: -10px 0 16px;
 }
+/* The header runs edge to edge */
+body {
+  margin: 0;
+  background: #fff;
+}

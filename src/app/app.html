@@ -1,6 +1,10 @@
-<app-api-docs-link></app-api-docs-link>
+<app-header [networks]="header().networks" [tools]="header().tools" [homeActive]="isHome()"></app-header>
 
-<div class="page">
+<main class="page">
+
+  @if (crumbs().length) {
+    <app-page-nav [crumbs]="crumbs()" [switcher]="switcher()"></app-page-nav>
+  }
 
   <div class="selector-container" *ngIf="!selectedNetwork && !selectedTestingTool">
     <h1>Select Card Network</h1>
@@ -16,19 +20,16 @@
     <div class="network-options">
       <button class="network-btn" *ngFor="let tool of selectedNetworkConfig?.tools" (click)="selectTool(tool.slug)" [title]="tool.name">{{ tool.label }}</button>
     </div>
-    <button class="back-btn-bottom" (click)="goBackToNetworks()">&larr; Back</button>
   </div>
 
   <div class="arqc-wrapper" *ngIf="pageComponent() as page">
     <ng-container *ngComponentOutlet="page"></ng-container>
-    <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>
 
   <div class="selector-container" *ngIf="selectedTool && !pageComponent()">
     <h2>{{ selectedToolLabel }}</h2>
     <p class="network-platform">{{ selectedToolName }}</p>
     <p class="maintenance-text">Under Maintenance</p>
-    <button class="back-btn-bottom" (click)="goBackToTools()">&larr; Back</button>
   </div>
 
-</div>
+</main>

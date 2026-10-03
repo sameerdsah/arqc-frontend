@@ -1,0 +1,21 @@
+<nav class="crumbs" aria-label="Breadcrumb">
+  <ol>
+    @for (crumb of crumbs(); track $index) {
+      <li>
+        @if (crumb.active) {
+          <span aria-current="page" [title]="crumb.title ?? ''">{{ crumb.label }}</span>
+        } @else {
+          <a [routerLink]="crumb.url">{{ crumb.label }}</a>
+        }
+      </li>
+    }
+  </ol>
+</nav>
+@if (switcher().length) {
+  <nav class="switcher" aria-label="Switch to another value">
+    @for (link of switcher(); track link.url) {
+      <a class="chip" [routerLink]="link.url" [class.active]="link.active" [attr.aria-current]="link.active ? 'page' : null"
+         [title]="link.title ?? ''">{{ link.label }}</a>
+    }
+  </nav>
+}

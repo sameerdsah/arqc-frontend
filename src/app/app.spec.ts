@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { Title } from '@angular/platform-browser';
 import { App } from './app';
 
 // Expected buttons on each network page (same order as NETWORK_CONFIG in app.ts)
@@ -155,6 +156,48 @@ describe('App', () => {
       const link = el.querySelector('app-api-docs-link a') as HTMLAnchorElement;
       expect(link?.getAttribute('href')).toBe('/api/docs');
     }
+  });
+
+  it('shows the header on every page, with the current network highlighted', async () => {
+    for (const url of ['/', '/visa', '/visa/arqc', '/tools/verify']) {
+      await go(url);
+      const labels = Array.from(el.querySelectorAll('app-header .links a')).map(a => a.textContent?.trim());
+      expect(labels).toEqual(['Discover', 'Mastercard', 'Visa', 'Amex', 'Verify', 'Batch']);
+      expect(el.querySelector('app-header .brand')?.getAttribute('href')).toBe('/');
+    }
+    expect(el.querySelector('app-header .links a.active')?.textContent?.trim()).toBe('Verify');
+    await go('/mastercard/cvc2');
+    expect(el.querySelector('app-header .links a.active')?.textContent?.trim()).toBe('Mastercard');
+  });
+
+  it('goes home and to a network straight from the header', async () => {
+    await go('/visa/arqc');
+    (el.querySelector('app-header .brand') as HTMLAnchorElement).click();
+    await fixture.whenStable();
+    expect(router.url).toBe('/');
+    await go('/visa/arqc');
+    (Array.from(el.querySelectorAll<HTMLAnchorElement>('app-header .links a')).find(a => a.textContent?.trim() === 'Amex'))!.click();
+    await fixture.whenStable();
+    expect(router.url).toBe('/amex');
+  });
+
+  it('shows a breadcrumb and switches between the values of a network in one click', async () => {
+    await go('/');
+    expect(el.querySelector('app-page-nav')).toBeNull();
+    await go('/visa/arqc');
+    const crumbs = Array.from(el.querySelectorAll('app-page-nav .crumbs li')).map(li => li.textContent?.trim());
+    expect(crumbs).toEqual(['Home', 'Visa', 'ARQC']);
+    const arpc = Array.from(el.querySelectorAll<HTMLAnchorElement>('app-page-nav .chip')).find(a => a.textContent?.trim() === 'ARPC')!;
+    arpc.click();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    expect(router.url).toBe('/visa/arpc');
+    expect(el.querySelector('app-visa-arpc-generator')).toBeTruthy();
+  });
+
+  it('names the browser tab after the page', async () => {
+    await go('/visa/arqc');
+    expect(TestBed.inject(Title).getTitle()).toBe('Visa ARQC · Cryptogram Generator');
   });
 
   it('shows the testing tools on the start page and opens them by address', async () => {
