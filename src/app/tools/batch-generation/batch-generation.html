@@ -70,11 +70,34 @@
         <button type="button" class="secondary" (click)="downloadResults()">Download results (CSV)</button>
       </div>
 
+      @if (r.summary.causes?.length) {
+        <section class="causes" aria-label="Causes of the mismatches">
+          <h3>Why {{ r.summary.mismatched }} value{{ r.summary.mismatched === 1 ? ' does' : 's do' }} not match</h3>
+          @for (c of r.summary.causes; track c.cause) {
+            <button type="button" class="cause-row" [class.selected]="causeFilter() === c.cause"
+                    [class.unexplained]="c.cause === 'unexplained'" [attr.aria-pressed]="causeFilter() === c.cause"
+                    (click)="toggleCause(c.cause)" title="Show only these rows">
+              <span class="cause-title">{{ c.title }}</span>
+              <span class="bar" aria-hidden="true"><span class="fill" [style.width.%]="share(c.count)"></span></span>
+              <b class="count">{{ c.count }}</b>
+            </button>
+          }
+          <p class="hint">
+            @if (causeFilter()) {
+              Showing only these rows. <button type="button" class="link-btn" (click)="causeFilter.set(null)">Show all rows</button>
+            } @else {
+              Click a cause to see its rows. The CSV has the cause and the fix for every row.
+            }
+          </p>
+        </section>
+      }
+
       <div class="table-wrap">
         <table>
-          <thead><tr><th>#</th><th>Ref</th><th>{{ r.type }}</th><th>Received</th><th>Status</th></tr></thead>
+          <thead><tr><th>#</th><th>Ref</th><th>{{ r.type }}</th><th>Received</th><th>Status</th>
+            @if (explained()) {<th>Cause</th>}</tr></thead>
           <tbody>
-            @for (item of r.results; track item.index) {
+            @for (item of visibleResults(); track item.index) {
               <tr>
                 <td>{{ item.index + 1 }}</td>
                 <td>{{ item.ref }}</td>
@@ -88,6 +111,18 @@
                     @default { <span class="badge bad">Error</span> <small class="err">{{ item.error }}</small> }
                   }
                 </td>
+                @if (explained()) {
+                  <td>
+                    @if (causeOf(item); as c) {
+                      @if (c.finding; as f) {
+                        <span class="cause" [title]="f.explanation">{{ f.title ?? f.cause }}@if (f.confidence === 'possible') {<span class="maybe"> (possible)</span>}</span>
+                        <small class="fix">{{ fix(f) }}</small>
+                      } @else {
+                        <span class="cause none">No common cause found</span>
+                      }
+                    }
+                  </td>
+                }
               </tr>
             }
           </tbody>

@@ -6,6 +6,7 @@ import {
   DiagnosisFinding, Explanation, groupByNetwork, OperationGroup, OperationInfo, VerifyResult
 } from '../../core/operations/operations.models';
 import { changesOf, checkReport, IDLE, isApplied } from '../../core/operations/value-check';
+import { buildCheckLink, currentSearch, OPERATION_PARAM, readCheckLink } from '../../core/operations/check-link';
 import { friendlyErrorMessage } from '../../shared/api-error';
 import { ChipDataPaste } from '../../shared/chip-data-paste/chip-data-paste';
 import { CheckOutcome } from '../../shared/check-outcome/check-outcome';
@@ -75,11 +76,17 @@ export class VerifyValue {
     const finding = this.appliedFinding();
     return this.result()?.valid && isApplied(finding, this.values()) ? finding : null;
   });
+  readonly link = computed(() => {
+    const r = this.result();
+    const op = this.selected();
+    return r && op && typeof location !== 'undefined'
+      ? buildCheckLink(location.origin, location.pathname, this.input(op), r.received, { [OPERATION_PARAM]: op.id }) : '';
+  });
   readonly report = computed(() => {
     const r = this.result();
     const op = this.selected();
     return r && op ? checkReport({ value: `${op.label} (${op.id})`, input: this.input(op), expected: r.expected,
-                                   received: r.received, explanation: this.explanation() }) : '';
+                                   received: r.received, explanation: this.explanation(), link: this.link() }) : '';
   });
 
   constructor() {
@@ -90,6 +97,7 @@ export class VerifyValue {
         if (!this.selectedId() && catalogue.operations.length) {
           this.selectedId.set(catalogue.operations[0].id);
         }
+        this.openCheckLink();
       },
       error: err => this.loadError.set(friendlyErrorMessage(err))
     });
@@ -174,6 +182,19 @@ export class VerifyValue {
         next: result => this.result.set(result),
         error: err => this.error.set(friendlyErrorMessage(err))
       });
+  }
+
+  /** A shared link (?operation=visa/arqc&tag_9f02=...&received=...) selects the value, fills it and verifies. */
+  private openCheckLink() {
+    const search = currentSearch();
+    const op = this.operations().find(o => o.id === new URLSearchParams(search).get(OPERATION_PARAM));
+    const link = op ? readCheckLink(search, op.fields.map(f => f.name)) : null;
+    if (op && link) {
+      this.selectedId.set(op.id);
+      this.values.set(link.input);
+      this.received.set(link.received);
+      this.verify();
+    }
   }
 
   private input(op: OperationInfo): Record<string, string> {

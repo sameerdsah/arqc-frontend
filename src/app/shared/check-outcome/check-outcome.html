@@ -64,11 +64,15 @@
 
   @if (report()) {
     <div class="tools">
+      @if (link()) {
+        <button type="button" class="copy-btn" (click)="copyLink()"
+                title="A link that reopens this page with the same values and runs the same check">{{ linkCopied() ? '✔ Link copied' : 'Copy link' }}</button>
+      }
       <button type="button" class="copy-btn" (click)="copy()">{{ copied() ? '✔ Copied' : 'Copy check report' }}</button>
     </div>
-    @if (copyBlocked()) {
+    @if (blockedText(); as text) {
       <p class="muted">The browser blocked copying. Select the text below and copy it.</p>
-      <pre class="report">{{ report() }}</pre>
+      <pre class="report">{{ text }}</pre>
     }
   }
 </div>

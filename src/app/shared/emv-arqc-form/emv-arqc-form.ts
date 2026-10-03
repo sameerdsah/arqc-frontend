@@ -9,6 +9,7 @@ import { exampleChipDataFor } from '../../core/emv/chip-examples';
 import { ExampleValuesLink } from '../example-values-link/example-values-link';
 import { ReceivedValueCheck } from '../received-check/received-check';
 import { Calculation } from '../../core/operations/operations.models';
+import { currentSearch, readCheckLink } from '../../core/operations/check-link';
 
 /** Settings for one network's ARQC page: Discover, Visa or Mastercard. */
 export interface EmvArqcConfig {
@@ -101,6 +102,17 @@ export class EmvArqcForm implements OnChanges {
     this.arqcRequest = Object.fromEntries(this.fields.map(f => [f.key, '']));
     this.received = '';
     this.clearResult();
+    this.openCheckLink();
+  }
+
+  /** A shared check link (?tag_9f02=...&received=...) fills the form and runs the check. */
+  private openCheckLink() {
+    const link = readCheckLink(currentSearch(), this.fieldKeys);
+    if (link) {
+      this.arqcRequest = { ...link.input };
+      this.received = link.received;
+      this.calculate();
+    }
   }
 
   /** Fills every field with the documented test values (they give the documented ARQC). */

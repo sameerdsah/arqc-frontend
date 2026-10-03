@@ -8,6 +8,7 @@ import {
   changesOf, checkReport, IDLE, isApplied, LOADING, normaliseReceived, resultFormat
 } from '../../core/operations/value-check';
 import { CheckOutcome } from '../check-outcome/check-outcome';
+import { buildCheckLink } from '../../core/operations/check-link';
 
 interface ExplainRequest {
   path: string;
@@ -85,11 +86,20 @@ export class ReceivedValueCheck {
       switchMap(request => request ? this.explain(request) : of(IDLE))),
     { initialValue: IDLE });
 
+  /** Link that reopens this page with the same input and received value, and runs the check. */
+  readonly link = computed(() => {
+    const c = this.compared();
+    const calc = this.calculation();
+    return c && calc && typeof location !== 'undefined'
+      ? buildCheckLink(location.origin, location.pathname, calc.input, c.received) : '';
+  });
+
   readonly report = computed(() => {
     const c = this.compared();
     const calc = this.calculation();
     return c && calc ? checkReport({ value: `${this.valueName()} (POST ${this.path()})`, input: calc.input,
-                                     expected: c.expected, received: c.received, explanation: this.explanation() }) : '';
+                                     expected: c.expected, received: c.received, explanation: this.explanation(),
+                                     link: this.link() }) : '';
   });
 
   open() {

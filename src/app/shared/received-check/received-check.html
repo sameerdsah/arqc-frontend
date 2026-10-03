@@ -19,7 +19,7 @@
 
     @if (compared(); as c) {
       <app-check-outcome [type]="valueName()" [expected]="c.expected" [received]="c.received"
-                         [explanation]="explanation()" [applied]="applied()" [report]="report()"
+                         [explanation]="explanation()" [applied]="applied()" [report]="report()" [link]="link()"
                          (apply)="applyFinding($event)"></app-check-outcome>
     }
   </div>

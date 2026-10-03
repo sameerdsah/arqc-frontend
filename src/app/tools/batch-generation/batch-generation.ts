@@ -3,17 +3,21 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 import { OperationsService } from '../../core/operations/operations.service';
 import {
-  BatchItemResult, BatchResult, groupByNetwork, OperationGroup, OperationInfo
+  BatchItemResult, BatchResult, DiagnosisFinding, groupByNetwork, OperationGroup, OperationInfo
 } from '../../core/operations/operations.models';
 import { downloadText, parseCsv, toCsv } from '../../core/csv/csv';
 import { friendlyErrorMessage } from '../../shared/api-error';
-import { buildTemplate, csvToBatchItems, itemStatus, ItemStatus, ParsedBatch, resultsToCsv } from './batch-csv';
+import {
+  buildTemplate, csvToBatchItems, fixText, itemCause, itemStatus, ItemStatus, ParsedBatch, resultsToCsv
+} from './batch-csv';
 
 const MAX_FILE_BYTES = 1024 * 1024;   // far above 500 rows; protects the browser from huge files
 
 /**
  * Generate - or verify - up to 500 values in one go from a CSV file.
  * Steps: choose the value, download the template, upload the CSV, run, download the results.
+ * Rows with a received value are verified, and every mismatch is explained (Mismatch Explainer):
+ * the summary counts the causes, and a click on a cause shows only those rows.
  */
 @Component({
   selector: 'app-batch-generation',
@@ -44,6 +48,15 @@ export class BatchGeneration {
   readonly busy = signal(false);
   readonly result = signal<BatchResult | null>(null);
   readonly error = signal<string | null>(null);
+
+  /** Show only the rows with this cause (null: all rows). */
+  readonly causeFilter = signal<string | null>(null);
+  readonly visibleResults = computed(() => {
+    const rows = this.result()?.results ?? [];
+    const cause = this.causeFilter();
+    return cause ? rows.filter(r => itemCause(r)?.cause === cause) : rows;
+  });
+  readonly explained = computed(() => (this.result()?.results ?? []).some(r => !!r.diagnosis));
 
   constructor() {
     this.api.catalogue$.pipe(takeUntilDestroyed()).subscribe({
@@ -111,7 +124,9 @@ export class BatchGeneration {
     }
     this.clearOutcome();
     this.busy.set(true);
-    this.api.runBatch({ operation: op.id, items: parsed.items })
+    // Rows with a received value are verified; their mismatches are explained as well
+    const diagnose = parsed.items.some(item => !!item.received);
+    this.api.runBatch({ operation: op.id, items: parsed.items, ...(diagnose ? { diagnose } : {}) })
       .pipe(finalize(() => this.busy.set(false)))
       .subscribe({
         next: result => this.result.set(result),
@@ -132,8 +147,27 @@ export class BatchGeneration {
     return itemStatus(r);
   }
 
+  causeOf(r: BatchItemResult) {
+    return itemCause(r);
+  }
+
+  fix(finding: DiagnosisFinding): string {
+    return fixText(finding);
+  }
+
+  /** Bar length of a cause, relative to all mismatches. */
+  share(count: number): number {
+    const total = this.result()?.summary.mismatched ?? 0;
+    return total ? Math.round((100 * count) / total) : 0;
+  }
+
+  toggleCause(cause: string) {
+    this.causeFilter.update(current => (current === cause ? null : cause));
+  }
+
   private clearOutcome() {
     this.result.set(null);
     this.error.set(null);
+    this.causeFilter.set(null);
   }
 }

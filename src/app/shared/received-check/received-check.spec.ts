@@ -127,4 +127,13 @@ describe('ReceivedValueCheck', () => {
     expect(component.received()).toBe('');
     expect(el.querySelector('#received')).toBeNull();
   });
+
+  it('offers a link that reopens the same check', () => {
+    calculated('949BBD6013450C7D');
+    component.open();
+    fixture.detectChanges();
+    type('949BBD6013450C7D');
+    expect(component.link()).toContain('?tag_9f36=0001&received=949BBD6013450C7D');
+    expect(component.report()).toContain('Link:');
+  });
 });

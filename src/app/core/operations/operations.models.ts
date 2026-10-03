@@ -51,6 +51,7 @@ export interface DiagnosisChange {
 /** The most likely cause of a mismatch, found by recalculating well-known mistakes. */
 export interface DiagnosisFinding {
   cause: string;                       // e.g. 'atc-drift', 'other-value', 'received-is-input'
+  title?: string;                      // short name, e.g. 'Transaction counter (9F36)'
   explanation: string;                 // plain English, ready to show
   confidence: 'certain' | 'possible';  // 'possible' for short values (3 digits) that can match by chance
   note?: string;
@@ -76,6 +77,12 @@ export type Explanation =
   | { status: 'done'; diagnosis: Diagnosis }
   | { status: 'error'; message: string };
 
+export interface BatchCause {
+  cause: string;           // e.g. 'atc-drift', 'unexplained'
+  title: string;           // e.g. 'Transaction counter (9F36)'
+  count: number;
+}
+
 export interface BatchItem {
   ref?: string;
   input: Record<string, string>;
@@ -85,6 +92,7 @@ export interface BatchItem {
 export interface BatchRequest {
   operation: string;
   items: BatchItem[];
+  diagnose?: boolean;      // explain every mismatched item; doubles the rate-limit cost
 }
 
 export interface BatchItemResult {
@@ -94,6 +102,7 @@ export interface BatchItemResult {
   received?: string;
   valid?: boolean;
   error?: string;
+  diagnosis?: Diagnosis;   // mismatched items, when diagnose was requested
 }
 
 export interface BatchSummary {
@@ -102,6 +111,7 @@ export interface BatchSummary {
   failed: number;
   matched?: number;
   mismatched?: number;
+  causes?: BatchCause[];   // with diagnose: the causes of the mismatches, most frequent first
 }
 
 export interface BatchResult {

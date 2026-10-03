@@ -1,4 +1,6 @@
-import { BatchItem, BatchItemResult, BatchResult, OperationInfo } from '../../core/operations/operations.models';
+import {
+  BatchItem, BatchItemResult, BatchResult, DiagnosisFinding, OperationInfo
+} from '../../core/operations/operations.models';
 
 /** Columns with a special meaning; every other column must be an input field of the operation. */
 export const REF_COLUMN = 'ref';
@@ -68,14 +70,45 @@ export function itemStatus(result: BatchItemResult): ItemStatus {
   return result.valid ? 'MATCH' : 'MISMATCH';
 }
 
-/** Results as CSV: the submitted values plus result, status and error for every row. */
+export const UNEXPLAINED = 'unexplained';
+
+/** The cause of a mismatched item: its finding, or "unexplained"; null when there is nothing to explain. */
+export function itemCause(result: BatchItemResult): { cause: string; finding: DiagnosisFinding | null } | null {
+  if (!result.diagnosis) {
+    return null;
+  }
+  const finding = result.diagnosis.findings[0] ?? null;
+  return { cause: finding?.cause ?? UNEXPLAINED, finding };
+}
+
+/** The fix as short text, e.g. "tag_9f36: 0001 -> 0002" or "it is the Discover CID". */
+export function fixText(finding: DiagnosisFinding | null): string {
+  if (!finding) {
+    return '';
+  }
+  if (finding.operation) {
+    return `it is the ${finding.operation.label}`;
+  }
+  return finding.changes.map(c => `${c.field}: ${c.from} -> ${c.to}`).join('; ');
+}
+
+/** Results as CSV: the submitted values plus result, status, error and - for mismatches - the cause. */
 export function resultsToCsv(op: OperationInfo, items: BatchItem[], result: BatchResult): string[][] {
   const fieldNames = op.fields.map(f => f.name);
-  const header = [REF_COLUMN, ...fieldNames, RECEIVED_COLUMN, 'result', 'status', 'error'];
+  const explained = result.results.some(r => r.diagnosis);
+  const header = [REF_COLUMN, ...fieldNames, RECEIVED_COLUMN, 'result', 'status', 'error',
+                  ...(explained ? ['cause', 'confidence', 'fix', 'explanation'] : [])];
   const rows = result.results.map(r => {
     const item = items[r.index];
-    return [r.ref ?? item?.ref ?? '', ...fieldNames.map(n => item?.input[n] ?? ''), item?.received ?? '',
-            r.result ?? '', itemStatus(r), r.error ?? ''];
+    const row = [r.ref ?? item?.ref ?? '', ...fieldNames.map(n => item?.input[n] ?? ''), item?.received ?? '',
+                 r.result ?? '', itemStatus(r), r.error ?? ''];
+    if (explained) {
+      const c = itemCause(r);
+      const f = c?.finding ?? null;
+      row.push(c ? (f ? f.title ?? f.cause : 'No common cause found') : '', f?.confidence ?? '', fixText(f),
+               f?.explanation ?? '');
+    }
+    return row;
   });
   return [header, ...rows];
 }

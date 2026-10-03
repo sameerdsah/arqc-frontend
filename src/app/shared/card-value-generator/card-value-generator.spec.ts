@@ -163,4 +163,25 @@ describe('CardValueGenerator', () => {
     expect(fixture.nativeElement.querySelector('.outcome.ok')?.textContent).toContain('Match');
     expect(fixture.nativeElement.textContent).toContain('Copy check report');
   });
+
+  it('opens a shared check link: fills the form and runs the check', async () => {
+    const before = location.pathname + location.search;
+    history.replaceState(null, '', '/visa/cvv?pan=4123456789012345&expiry=8701&service_code=101&received=636');
+    try {
+      fixture = TestBed.createComponent(CardValueGenerator);
+      component = fixture.componentInstance;
+      fixture.componentRef.setInput('config', VISA_CVV);
+      fixture.detectChanges();                     // no whenStable: the request is deliberately still open
+      const req = httpMock.expectOne('/api/visa/cvv');
+      expect(req.request.body).toEqual({ pan: '4123456789012345', expiry: '8701', service_code: '101' });
+      req.flush({ result: '561', type: 'CVV' });
+      fixture.detectChanges();
+      fixture.detectChanges();
+      expect(component.received).toBe('636');
+      expect(fixture.nativeElement.querySelector('.outcome.bad')?.textContent).toContain('No match');
+      httpMock.match('/api/operations');          // the explanation is covered by the received-check tests
+    } finally {
+      history.replaceState(null, '', before);
+    }
+  });
 });

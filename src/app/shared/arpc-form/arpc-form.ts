@@ -9,6 +9,7 @@ import { buildTlv } from '../../core/emv/tlv';
 import { friendlyErrorMessage } from '../api-error';
 import { ReceivedValueCheck } from '../received-check/received-check';
 import { Calculation } from '../../core/operations/operations.models';
+import { currentSearch, readCheckLink } from '../../core/operations/check-link';
 
 /** Settings for one scheme's ARPC page. */
 export interface ArpcConfig {
@@ -57,6 +58,17 @@ export class ArpcForm implements OnChanges {
     this.response = null;
     this.isError = false;
     this.error_response = null;
+    this.openCheckLink();
+  }
+
+  /** A shared check link (?arqc=...&tag_8a=...&received=...) fills the form and runs the check. */
+  private openCheckLink() {
+    const link = readCheckLink(currentSearch(), ['arqc', 'tag_8a']);
+    if (link) {
+      this.arpcRequest = { arqc: link.input['arqc'], tag_8a: link.input['tag_8a'] };
+      this.received = link.received;
+      this.calculate();
+    }
   }
 
   /** Values read from pasted chip data replace the matching fields. */

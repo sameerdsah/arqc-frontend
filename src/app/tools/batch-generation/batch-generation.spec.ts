@@ -92,4 +92,46 @@ describe('BatchGeneration', () => {
     fixture.detectChanges();
     expect(el.textContent).toContain('Too many requests – please wait 20 seconds and try again.');
   });
+
+  it('explains the mismatches: counts the causes, filters the rows by cause and shows the fix', () => {
+    load('ref,pan,expiry,received\na,4111111111111111,3012,598\nb,4111111111111111,3012,598\nc,4111111111111111,3012,999\nd,4111111111111111,3012,597');
+    component.run();
+    const req = http.expectOne('/api/batch');
+    expect(req.request.body.diagnose).toBe(true);
+    const finding = { cause: 'pan-transposition', title: 'PAN digits swapped', confidence: 'possible', explanation: 'Swapped.',
+                      changes: [{ field: 'pan', label: 'PAN', from: '4111111111111111', to: '1411111111111111' }] };
+    req.flush({ operation: 'visa/cvv2', type: 'CVV2',
+      summary: { total: 4, succeeded: 4, failed: 0, matched: 1, mismatched: 3,
+                 causes: [{ cause: 'pan-transposition', title: 'PAN digits swapped', count: 2 },
+                          { cause: 'unexplained', title: 'No common cause found', count: 1 }] },
+      results: [{ index: 0, ref: 'a', result: '597', received: '598', valid: false, diagnosis: { checked: 3, findings: [finding] } },
+                { index: 1, ref: 'b', result: '597', received: '598', valid: false, diagnosis: { checked: 3, findings: [finding] } },
+                { index: 2, ref: 'c', result: '597', received: '999', valid: false, diagnosis: { checked: 20, findings: [] } },
+                { index: 3, ref: 'd', result: '597', received: '597', valid: true }] });
+    fixture.detectChanges();
+
+    expect(el.querySelector('.causes h3')?.textContent).toContain('Why 3 values do not match');
+    const causes = Array.from(el.querySelectorAll<HTMLButtonElement>('.cause-row'));
+    expect(causes.map(c => [c.querySelector('.cause-title')?.textContent?.trim(), c.querySelector('.count')?.textContent?.trim()]))
+      .toEqual([['PAN digits swapped', '2'], ['No common cause found', '1']]);
+    expect(el.querySelector('thead')?.textContent).toContain('Cause');
+    expect(el.querySelector('tbody tr .fix')?.textContent).toBe('pan: 4111111111111111 -> 1411111111111111');
+
+    causes[1].click();
+    fixture.detectChanges();
+    const rows = Array.from(el.querySelectorAll('tbody tr')).map(r => r.textContent ?? '');
+    expect(rows.length).toBe(1);
+    expect(rows[0]).toContain('No common cause found');
+    causes[1].click();
+    fixture.detectChanges();
+    expect(el.querySelectorAll('tbody tr').length).toBe(4);
+  });
+
+  it('does not ask for explanations when no row has a received value', () => {
+    component.loadSampleRows();
+    component.run();
+    const req = http.expectOne('/api/batch');
+    expect(req.request.body.diagnose).toBeUndefined();
+    req.flush({ operation: 'visa/cvv2', type: 'CVV2', summary: { total: 3, succeeded: 3, failed: 0 }, results: [] });
+  });
 });

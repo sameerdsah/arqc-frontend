@@ -106,4 +106,18 @@ describe('CheckOutcome', () => {
     fixture.detectChanges();
     expect(el.querySelector('.report')?.textContent).toBe('REPORT');
   });
+
+  it('copies a shareable link when the page provides one', async () => {
+    render('949BBD6013450C7D', '673A05ED91892AF8', { status: 'idle' }, 'REPORT');
+    fixture.componentRef.setInput('link', 'https://x/visa/arqc?received=673A05ED91892AF8');
+    fixture.detectChanges();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    const buttons = Array.from(el.querySelectorAll<HTMLButtonElement>('.copy-btn'));
+    expect(buttons.map(b => b.textContent?.trim())).toEqual(['Copy link', 'Copy check report']);
+    await fixture.componentInstance.copyLink();
+    fixture.detectChanges();
+    expect(writeText).toHaveBeenCalledWith('https://x/visa/arqc?received=673A05ED91892AF8');
+    expect(el.querySelector('.copy-btn')?.textContent).toContain('Link copied');
+  });
 });

@@ -62,6 +62,7 @@ export interface CheckReportData {
   expected: string;
   received: string;
   explanation?: Explanation;
+  link?: string;                       // shareable check link (reopens the same check)
 }
 
 /**
@@ -92,6 +93,9 @@ export function checkReport(data: CheckReportData): string {
   } else if (!match && explanation.status === 'done') {
     lines.push(`Likely cause: none of ${explanation.diagnosis.checked} common input mistakes reproduces the received ` +
                'value (check the key, the cryptogram version and the card data).');
+  }
+  if (data.link) {
+    lines.push(`Link:      ${data.link}`);
   }
   lines.push('Test data and test keys only.');
   return lines.join('\n');

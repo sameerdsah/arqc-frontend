@@ -7,6 +7,7 @@ import { ExampleValuesLink } from '../example-values-link/example-values-link';
 import { friendlyErrorMessage } from '../api-error';
 import { ReceivedValueCheck } from '../received-check/received-check';
 import { Calculation } from '../../core/operations/operations.models';
+import { currentSearch, readCheckLink } from '../../core/operations/check-link';
 
 /** Settings for one card verification page, e.g. Visa CVV2 or Mastercard Chip CVC. */
 export interface CardValueConfig {
@@ -54,6 +55,18 @@ export class CardValueGenerator implements OnChanges {
     this.response = null;
     this.isError = false;
     this.error_response = null;
+    this.openCheckLink();
+  }
+
+  /** A shared check link (?pan=...&expiry=...&received=...) fills the form and runs the check. */
+  private openCheckLink() {
+    const fields = this.config.needsServiceCode ? ['pan', 'expiry', 'service_code'] : ['pan', 'expiry'];
+    const link = readCheckLink(currentSearch(), fields);
+    if (link) {
+      this.cardRequest = { pan: link.input['pan'], expiry: link.input['expiry'], service_code: link.input['service_code'] ?? '' };
+      this.received = link.received;
+      this.calculate();
+    }
   }
 
   get resultPrefix(): string {

@@ -37,3 +37,22 @@ th { position: sticky; top: 0; background: #f6f8fb; }
 .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; background: #eef2f7; color: #475467; font-size: 0.8rem; white-space: nowrap; }
 .badge.ok { background: #e9f7ef; color: #177245; }
 .badge.bad { background: #fff0f0; color: #b42318; }
+
+/* Causes of the mismatches (Mismatch Explainer) */
+.causes { margin: 4px 0 14px; padding: 12px 14px; border: 1px solid #d9e1ec; border-radius: 6px; background: #fbfcfe; }
+.causes h3 { margin: 0 0 8px; font-size: 0.95rem; color: #1f2937; }
+.cause-row { display: grid; grid-template-columns: minmax(0, 1fr) 90px 36px; align-items: center; gap: 10px; width: 100%;
+             padding: 6px 8px; margin: 2px 0; background: none; border: 1px solid transparent; border-radius: 4px;
+             text-align: left; font-size: 0.85rem; color: #1f2937; }
+.cause-row:hover { background: #eef5fd; }
+.cause-row.selected { background: #e3efff; border-color: #9cc0ea; }
+.cause-row:focus-visible { outline: 2px solid #0d47a1; outline-offset: 1px; }
+.cause-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar { height: 8px; background: #e6ebf2; border-radius: 4px; overflow: hidden; }
+.fill { display: block; height: 100%; background: #1976d2; border-radius: 4px; }
+.unexplained .fill { background: #98a2b3; }
+.count { text-align: right; }
+.cause { display: block; font-weight: 600; color: #1f2937; white-space: nowrap; }
+.cause.none { font-weight: 400; color: #667085; }
+.maybe { font-weight: 400; color: #8a5300; }
+.fix { display: block; color: #475467; font-family: 'Courier New', Courier, monospace; white-space: nowrap; }

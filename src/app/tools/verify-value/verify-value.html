@@ -57,7 +57,7 @@
 
       @if (result(); as r) {
         <app-check-outcome [type]="r.type" [expected]="r.expected" [received]="r.received"
-                           [explanation]="explanation()" [applied]="applied()" [report]="report()"
+                           [explanation]="explanation()" [applied]="applied()" [report]="report()" [link]="link()"
                            (apply)="applyFinding($event)"></app-check-outcome>
       }
       @if (error()) {

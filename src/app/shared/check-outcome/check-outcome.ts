@@ -24,6 +24,8 @@ export class CheckOutcome {
   readonly applied = input<DiagnosisFinding | null>(null);
   /** Plain-text summary for "Copy check report". */
   readonly report = input('');
+  /** Shareable link that reopens this check (optional). */
+  readonly link = input('');
   /** The user chose to apply a finding (change the input, or switch to the other value). */
   readonly apply = output<DiagnosisFinding>();
 
@@ -38,9 +40,11 @@ export class CheckOutcome {
     return e.status === 'done' ? e.diagnosis.checked : 0;
   });
 
-  private readonly copiedReport = signal<string | null>(null);
-  readonly copied = computed(() => this.copiedReport() === this.report());
-  readonly copyBlocked = signal(false);
+  private readonly copiedText = signal<string | null>(null);
+  readonly copied = computed(() => this.copiedText() === this.report());
+  readonly linkCopied = computed(() => !!this.link() && this.copiedText() === this.link());
+  /** Text to show for manual copying when the browser blocks the clipboard. */
+  readonly blockedText = signal<string | null>(null);
 
   actionLabel(finding: DiagnosisFinding): string | null {
     if (finding.operation) {
@@ -50,14 +54,22 @@ export class CheckOutcome {
   }
 
   /** Copies the report; when the browser blocks the clipboard the text is shown to select instead. */
-  async copy() {
-    const text = this.report();
+  copy() {
+    return this.copyText(this.report());
+  }
+
+  /** Copies the shareable link. */
+  copyLink() {
+    return this.copyText(this.link());
+  }
+
+  private async copyText(text: string) {
     try {
       await navigator.clipboard.writeText(text);
-      this.copiedReport.set(text);
-      this.copyBlocked.set(false);
+      this.copiedText.set(text);
+      this.blockedText.set(null);
     } catch {
-      this.copyBlocked.set(true);
+      this.blockedText.set(text);
     }
   }
 }

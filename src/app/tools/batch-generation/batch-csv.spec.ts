@@ -1,5 +1,5 @@
 import { OperationInfo } from '../../core/operations/operations.models';
-import { buildTemplate, csvToBatchItems, itemStatus, resultsToCsv } from './batch-csv';
+import { buildTemplate, csvToBatchItems, fixText, itemCause, itemStatus, resultsToCsv } from './batch-csv';
 
 const VISA_CVV2: OperationInfo = {
   id: 'visa/cvv2', network: 'visa', network_label: 'Visa', label: 'Visa CVV2', type: 'CVV2',
@@ -40,5 +40,28 @@ describe('batch CSV mapping', () => {
       summary: { total: 1, succeeded: 1, failed: 0 }, results: [{ index: 0, ref: 'a', result: '597', received: '598', valid: false }] });
     expect(csv).toEqual([['ref', 'pan', 'expiry', 'received', 'result', 'status', 'error'],
                          ['a', '4111111111111111', '3012', '598', '597', 'MISMATCH', '']]);
+  });
+
+  it('adds the cause, confidence, fix and explanation of every mismatch when the batch was explained', () => {
+    const swapped = { cause: 'pan-transposition', title: 'PAN digits swapped', confidence: 'possible' as const,
+                      explanation: 'Two PAN digits are swapped.',
+                      changes: [{ field: 'pan', label: 'PAN', from: '4111111111111111', to: '1411111111111111' }] };
+    const items = [{ ref: 'a', input: { pan: '4111111111111111', expiry: '3012' }, received: '598' },
+                   { ref: 'b', input: { pan: '4111111111111111', expiry: '3012' }, received: '999' },
+                   { ref: 'c', input: { pan: '4111111111111111', expiry: '3012' }, received: '597' }];
+    const result = { operation: 'visa/cvv2', type: 'CVV2', summary: { total: 3, succeeded: 3, failed: 0 },
+      results: [{ index: 0, ref: 'a', result: '597', received: '598', valid: false, diagnosis: { checked: 3, findings: [swapped] } },
+                { index: 1, ref: 'b', result: '597', received: '999', valid: false, diagnosis: { checked: 20, findings: [] } },
+                { index: 2, ref: 'c', result: '597', received: '597', valid: true }] };
+    const csv = resultsToCsv(VISA_CVV2, items, result);
+    expect(csv[0].slice(-4)).toEqual(['cause', 'confidence', 'fix', 'explanation']);
+    expect(csv[1].slice(-4)).toEqual(['PAN digits swapped', 'possible', 'pan: 4111111111111111 -> 1411111111111111',
+                                      'Two PAN digits are swapped.']);
+    expect(csv[2].slice(-4)).toEqual(['No common cause found', '', '', '']);
+    expect(csv[3].slice(-4)).toEqual(['', '', '', '']);
+    expect(itemCause(result.results[1])?.cause).toBe('unexplained');
+    expect(itemCause(result.results[2])).toBeNull();
+    expect(fixText({ ...swapped, changes: [], operation: { id: 'visa/cvv', label: 'Visa CVV', type: 'CVV' } }))
+      .toBe('it is the Visa CVV');
   });
 });
