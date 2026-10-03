@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { EmvArqcForm, EmvArqcConfig } from '../../shared/emv-arqc-form/emv-arqc-form';
+import { EmvArqcForm, EmvArqcConfig, fullEmvDataSet } from '../../shared/emv-arqc-form/emv-arqc-form';
 
 /**
  * Visa ARQC - Authorization Request Cryptogram (9F26), Visa CVN 10 / CVN 18.
@@ -18,8 +18,10 @@ export class VisaArqcGenerator {
     title: 'ARQC Generator',
     subtitle: 'Authorization Request Cryptogram (9F26) — Visa CVN 10 / CVN 18',
     apiUrl: '/api/visa/arqc',
-    iadPattern: '^(?:[0-9A-Fa-f]{2}){7,32}$',
-    aip: '3C00',
-    exampleIad: '06010A03A00000'
+    fields: fullEmvDataSet({
+      iadPattern: '^(?:[0-9A-Fa-f]{2}){7,32}$',
+      aip: '3C00',
+      exampleIad: '06010A03A00000'
+    })
   };
 }

@@ -1,12 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { By } from '@angular/platform-browser';
-import { EmvArqcForm, EmvArqcConfig } from './emv-arqc-form';
+import { EmvArqcForm, EmvArqcConfig, fullEmvDataSet } from './emv-arqc-form';
 
 const CONFIG: EmvArqcConfig = {
-  title: 'ARQC Generator', subtitle: 'Authorization Request Cryptogram (9F26)',
-  apiUrl: '/api/visa/arqc', iadPattern: '^(?:[0-9A-Fa-f]{2}){7,32}$',
-  aip: '3C00', exampleIad: '06010A03A00000'
+  title: 'ARQC Generator', subtitle: 'Authorization Request Cryptogram (9F26)', apiUrl: '/api/visa/arqc',
+  fields: fullEmvDataSet({ iadPattern: '^(?:[0-9A-Fa-f]{2}){7,32}$', aip: '3C00', exampleIad: '06010A03A00000' })
 };
 
 const VALID_ARQC_INPUT: Record<string, string> = {

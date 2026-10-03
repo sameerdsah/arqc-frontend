@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { EmvArqcForm, EmvArqcConfig } from '../../shared/emv-arqc-form/emv-arqc-form';
+import { EmvArqcForm, EmvArqcConfig, fullEmvDataSet } from '../../shared/emv-arqc-form/emv-arqc-form';
 
 /**
  * Mastercard ARQC - Authorization Request Cryptogram (9F26), M/Chip.
@@ -18,8 +18,10 @@ export class MastercardArqcGenerator {
     title: 'ARQC Generator',
     subtitle: 'Authorization Request Cryptogram (9F26) — M/Chip',
     apiUrl: '/api/mastercard/arqc',
-    iadPattern: '^(?:[0-9A-Fa-f]{2}){8,32}$',
-    aip: '1800',
-    exampleIad: '0110A00003220000000000000000000000FF'
+    fields: fullEmvDataSet({
+      iadPattern: '^(?:[0-9A-Fa-f]{2}){8,32}$',
+      aip: '1800',
+      exampleIad: '0110A00003220000000000000000000000FF'
+    })
   };
 }

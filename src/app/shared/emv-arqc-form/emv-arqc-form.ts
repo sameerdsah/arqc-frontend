@@ -8,11 +8,16 @@ import { ChipDataPaste } from '../chip-data-paste/chip-data-paste';
 import { exampleChipDataFor } from '../../core/emv/chip-examples';
 import { ExampleValuesLink } from '../example-values-link/example-values-link';
 
-/** Settings for one scheme's ARQC page, e.g. Visa or Mastercard. */
+/** Settings for one network's ARQC page: Discover, Visa or Mastercard. */
 export interface EmvArqcConfig {
   title: string;       // page heading, e.g. 'ARQC Generator'
   subtitle: string;    // full name shown under the heading
   apiUrl: string;      // backend endpoint, e.g. '/api/visa/arqc'
+  fields: EmvField[];  // the EMV tags this network's ARQC uses, in screen order
+}
+
+/** What differs between Visa and Mastercard in the full EMV data set. */
+export interface SchemeEmvSettings {
   iadPattern: string;  // allowed format of tag 9F10 for this scheme
   aip: string;         // typical Application Interchange Profile (tag 82), e.g. '3C00' (Visa), '1800' (Mastercard)
   exampleIad: string;  // example Issuer Application Data (9F10) for "Use example values"
@@ -35,7 +40,7 @@ export interface EmvField {
  *  - terminal and card data, which is usually the same for every test
  * The order on screen does not matter to the API: the backend builds the CDOL1 order itself.
  */
-function emvFields(config: EmvArqcConfig): EmvField[] {
+export function fullEmvDataSet(config: SchemeEmvSettings): EmvField[] {
   return [
     { heading: 'Transaction data', key: 'tag_9f02', id: 'tag9F02', label: 'Tag 9F02 (Amount, Authorized)', pattern: '^[0-9]{12}$', message: 'Please enter a valid amount', example: '000000010000' },
     { key: 'tag_9f37', id: 'tag9F37', label: 'Tag 9F37 (Unpredictable Number)', pattern: '^[0-9A-Fa-f]{8}$', message: 'Please enter a valid unpredictable number', example: '12345678' },
@@ -52,7 +57,10 @@ function emvFields(config: EmvArqcConfig): EmvField[] {
   ];
 }
 
-/** One reusable ARQC form for the schemes that use the full EMV data set (Visa, Mastercard). */
+/**
+ * One reusable ARQC form for every network. Visa and Mastercard use the full EMV data set
+ * (fullEmvDataSet); Discover uses its own five tags. Fields with a heading start a new group.
+ */
 @Component({
   selector: 'app-emv-arqc-form',
   imports: [FormsModule, CommonModule, ChipDataPaste, ExampleValuesLink],
@@ -76,14 +84,14 @@ export class EmvArqcForm implements OnChanges {
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnChanges() {
-    this.fields = emvFields(this.config);
+    this.fields = this.config.fields;
     this.fieldKeys = this.fields.map(f => f.key);
     this.exampleChipData = exampleChipDataFor(this.fields.map(f => ({ name: f.key, example: f.example })), [['9F27', '80']]);
     this.arqcRequest = Object.fromEntries(this.fields.map(f => [f.key, '']));
     this.clearResult();
   }
 
-  /** Fills all 11 fields with the documented test values (they give the documented ARQC). */
+  /** Fills every field with the documented test values (they give the documented ARQC). */
   useExampleValues() {
     this.arqcRequest = Object.fromEntries(this.fields.map(f => [f.key, f.example]));
     this.clearResult();

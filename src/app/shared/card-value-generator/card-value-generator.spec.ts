@@ -131,7 +131,7 @@ describe('CardValueGenerator', () => {
     }
   });
 
-    it('fills the test card of the network with "Use example values"', async () => {
+  it('fills the test card of the network with "Use example values"', async () => {
     await create(VISA_CVV);
     fixture.nativeElement.querySelector('app-example-values-link button').click();
     fixture.detectChanges();
@@ -141,5 +141,12 @@ describe('CardValueGenerator', () => {
     fixture.nativeElement.querySelector('app-example-values-link button').click();
     fixture.detectChanges();
     expect(component.cardRequest).toEqual({ pan: '5555555555554444', expiry: '3012', service_code: '' });
+  });
+
+  it('uses the test card from the page settings when given (Discover)', async () => {
+    await create({ ...VISA_CVV, apiUrl: '/api/cvv', example: { pan: '4123456789012345', expiry: '8701' } });
+    fixture.nativeElement.querySelector('app-example-values-link button').click();
+    fixture.detectChanges();
+    expect(component.cardRequest).toEqual({ pan: '4123456789012345', expiry: '8701', service_code: '101' });
   });
 });

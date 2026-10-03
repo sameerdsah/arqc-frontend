@@ -13,12 +13,13 @@ export interface CardValueConfig {
   valueName: string;          // short name used in messages, e.g. 'CVV2'
   apiUrl: string;             // backend endpoint, e.g. '/api/visa/cvv2'
   needsServiceCode: boolean;  // true for stripe values (CVV, CVC1); printed/chip values use a fixed code
+  example?: { pan: string; expiry: string };  // test card for "Use example values" (default: network test card)
 }
 
 /**
  * One reusable form for every value calculated with the CVV algorithm.
- * Visa CVV / CVV2 / iCVV and Mastercard CVC1 / CVC2 / Chip CVC differ only in
- * name, endpoint and whether the user enters a service code.
+ * Discover CVV / CID / iCVV, Visa CVV / CVV2 / iCVV and Mastercard CVC1 / CVC2 / Chip CVC
+ * differ only in name, endpoint, test card and whether the user enters a service code.
  */
 @Component({
   selector: 'app-card-value-generator',
@@ -51,10 +52,11 @@ export class CardValueGenerator implements OnChanges {
     return `The computed ${this.config.valueName} is:`;
   }
 
-  /** Fills the network's usual test card (Visa 4111..., Mastercard 5555...); service code 101 where asked. */
+  /** Fills the page's test card (or the network's usual one: Visa 4111..., Mastercard 5555...); service code 101 where asked. */
   useExampleValues() {
-    const pan = this.config.apiUrl.includes('/mastercard/') ? '5555555555554444' : '4111111111111111';
-    this.cardRequest = { pan, expiry: '3012', service_code: this.config.needsServiceCode ? '101' : '' };
+    const card = this.config.example
+      ?? { pan: this.config.apiUrl.includes('/mastercard/') ? '5555555555554444' : '4111111111111111', expiry: '3012' };
+    this.cardRequest = { ...card, service_code: this.config.needsServiceCode ? '101' : '' };
     this.response = null;
     this.isError = false;
     this.error_response = null;

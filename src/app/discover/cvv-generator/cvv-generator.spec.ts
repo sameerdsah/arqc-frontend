@@ -3,10 +3,10 @@ import { HttpClientTestingModule, HttpTestingController } from '@angular/common/
 import { By } from '@angular/platform-browser';
 import { CvvGenerator } from './cvv-generator';
 
-describe('CvvGenerator', () => {
-  let component: CvvGenerator;
+describe('Discover CvvGenerator', () => {
   let fixture: ComponentFixture<CvvGenerator>;
   let httpMock: HttpTestingController;
+  let el: HTMLElement;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -14,67 +14,65 @@ describe('CvvGenerator', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(CvvGenerator);
-    component = fixture.componentInstance;
     httpMock = TestBed.inject(HttpTestingController);
     fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+    el = fixture.nativeElement;
   });
 
   afterEach(() => {
     httpMock.verify();
   });
 
-  function setInputValue(selector: string, value: string) {
-    const input: HTMLInputElement = fixture.debugElement.query(By.css(selector)).nativeElement;
-    input.value = value;
-    input.dispatchEvent(new Event('input'));
+  async function settle() {
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
   }
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  function value(selector: string): string {
+    return (el.querySelector(selector) as HTMLInputElement).value;
+  }
+
+  async function submit() {
+    await settle();
+    fixture.debugElement.query(By.css('form')).nativeElement.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+  }
+
+  async function useExampleValues() {
+    (el.querySelector('app-example-values-link button') as HTMLButtonElement).click();
+    await settle();
+  }
+
+  it('uses the shared card form with the Discover CVV title', () => {
+    expect(el.querySelector('app-card-value-generator')).toBeTruthy();
+    expect(el.textContent).toContain('CVV Generator');
+    expect(el.textContent).toContain('Card Verification Value');
   });
 
-  it('should not send an HTTP request when the form is empty/invalid', () => {
-    const form = fixture.debugElement.query(By.css('form')).nativeElement;
-    form.dispatchEvent(new Event('submit'));
-    fixture.detectChanges();
-    httpMock.expectNone('/api/cvv');
+  it('asks for the PAN and expiry and the service code', () => {
+    expect(el.querySelector('#pan')).toBeTruthy();
+    expect(el.querySelector('#expiry')).toBeTruthy();
+    expect(el.querySelector('#serviceCode')).toBeTruthy();                // magnetic stripe value
   });
 
-  it('should show a required error once a field is touched and left empty', async () => {
-    setInputValue('#pan', '1');
-    setInputValue('#pan', '');
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-    expect(fixture.nativeElement.textContent).toContain('This field is required');
+  it('fills the Discover test card with "Use example values"', async () => {
+    await useExampleValues();
+    expect(value('#pan')).toBe('4123456789012345');
+    expect(value('#expiry')).toBe('8701');
+    expect(value('#serviceCode')).toBe('101');
   });
 
-  it('should send a POST to /api/cvv with valid input and handle the response', async () => {
-    setInputValue('#pan', '4123456789012345');
-    setInputValue('#expiry', '8701');
-    setInputValue('#serviceCode', '101');
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const form = fixture.debugElement.query(By.css('form')).nativeElement;
-    form.dispatchEvent(new Event('submit'));
-    fixture.detectChanges();
-
+  it('posts the example card to /api/cvv and shows the CVV', async () => {
+    await useExampleValues();
+    await submit();
     const req = httpMock.expectOne('/api/cvv');
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body.service_code).toBe('101');
-    req.flush({ result: '561' });
-
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(component.response.result).toBe('561');
-  });
-
-  it('fills the documented example values with "Use example values"', async () => {
-    fixture.nativeElement.querySelector('app-example-values-link button').click();
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(component.cvvRequest).toEqual({ pan: '4123456789012345', expiry: '8701', service_code: '101' });
+    expect(req.request.body).toEqual({ pan: '4123456789012345', expiry: '8701', service_code: '101' });
+    req.flush({ result: '561', type: 'CVV' });
+    await settle();
+    expect(el.textContent).toContain('The computed CVV is:');
+    expect(el.textContent).toContain('561');
   });
 });
