@@ -81,7 +81,7 @@ describe('BatchGeneration', () => {
   it('can load sample rows for a quick try', () => {
     component.loadSampleRows();
     fixture.detectChanges();
-    expect(el.textContent).toContain('3 rows ready from sample rows');
+    expect(el.textContent).toContain('3 rows ready from sample rows');   // this catalogue entry has no example result
   });
 
   it('shows friendly errors, e.g. when the rate limit is reached', () => {
@@ -128,7 +128,7 @@ describe('BatchGeneration', () => {
   });
 
   it('does not ask for explanations when no row has a received value', () => {
-    component.loadSampleRows();
+    load('pan,expiry\n4111111111111111,3012');
     component.run();
     const req = http.expectOne('/api/batch');
     expect(req.request.body.diagnose).toBeUndefined();

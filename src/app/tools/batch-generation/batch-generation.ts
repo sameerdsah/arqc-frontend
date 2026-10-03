@@ -8,7 +8,7 @@ import {
 import { downloadText, parseCsv, toCsv } from '../../core/csv/csv';
 import { friendlyErrorMessage } from '../../shared/api-error';
 import {
-  buildTemplate, csvToBatchItems, fixText, itemCause, itemStatus, ItemStatus, ParsedBatch, resultsToCsv
+  buildTemplate, csvToBatchItems, fixText, itemCause, itemStatus, ItemStatus, ParsedBatch, resultsToCsv, sampleRows
 } from './batch-csv';
 
 const MAX_FILE_BYTES = 1024 * 1024;   // far above 500 rows; protects the browser from huge files
@@ -84,15 +84,12 @@ export class BatchGeneration {
     }
   }
 
-  /** Three copies of the example row - a quick way to try the page or to demo it. */
+  /** Sample rows with every outcome - generated, match, a mismatch with a known cause, an unexplained one. */
   loadSampleRows() {
     const op = this.selected();
-    if (!op) {
-      return;
+    if (op) {
+      this.load(toCsv(sampleRows(op)), 'sample rows');
     }
-    const [header, example] = buildTemplate(op);
-    const rows = [header, ...[1, 2, 3].map(n => [`row-${n}`, ...example.slice(1)])];
-    this.load(toCsv(rows), 'sample rows');
   }
 
   async onFileSelected(event: Event) {

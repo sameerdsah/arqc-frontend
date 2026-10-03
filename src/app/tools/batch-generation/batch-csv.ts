@@ -20,6 +20,51 @@ export function buildTemplate(op: OperationInfo): string[][] {
   ];
 }
 
+/**
+ * Sample rows that show every outcome with one click: a value to generate, a match, a mismatch
+ * with a known cause (the input changed the way a real mistake would change it) and a value no
+ * common cause explains. Built from the catalogue's example, so it works for every operation.
+ */
+export function sampleRows(op: OperationInfo): string[][] {
+  const [header, example] = buildTemplate(op);
+  const input = (changes: Record<string, string> = {}) => op.fields.map(f => changes[f.name] ?? f.example);
+  const rows = [header, ['generate', ...input(), '']];
+  const expected = op.example_result;
+  if (!expected) {
+    return [...rows, ['generate-2', ...example.slice(1, -1), ''], ['generate-3', ...example.slice(1, -1), '']];
+  }
+  rows.push(['match', ...input(), expected]);
+  const mistake = knownMistake(op);
+  if (mistake) {
+    rows.push([mistake.ref, ...input(mistake.changes), expected]);
+  }
+  const unknown = /^[0-9]+$/.test(expected) ? '9'.repeat(expected.length) : '0123456789ABCDEF'.slice(0, expected.length);
+  rows.push(['unknown-value', ...input(), unknown === expected ? unknown.split('').reverse().join('') : unknown]);
+  return rows;
+}
+
+/** An input change that a real mistake would make, for the operation's fields (first one that applies). */
+function knownMistake(op: OperationInfo): { ref: string; changes: Record<string, string> } | null {
+  const example = (name: string) => op.fields.find(f => f.name === name)?.example;
+  const atc = example('tag_9f36');
+  if (atc && /^[0-9A-Fa-f]{4}$/.test(atc)) {
+    const next = ((parseInt(atc, 16) + 1) % 0x10000).toString(16).toUpperCase().padStart(4, '0');
+    return { ref: 'counter-moved-on', changes: { tag_9f36: next } };
+  }
+  const arc = example('tag_8a');
+  if (arc && /^3[0-9]3[0-9]$/.test(arc)) {
+    return { ref: 'response-code-raw', changes: { tag_8a: `0${arc[1]}0${arc[3]}` } };
+  }
+  const pan = example('pan');
+  if (pan) {
+    const i = [...pan].findIndex((d, k) => k < pan.length - 1 && d !== pan[k + 1]);
+    if (i >= 0) {
+      return { ref: 'pan-typo', changes: { pan: pan.slice(0, i) + pan[i + 1] + pan[i] + pan.slice(i + 2) } };
+    }
+  }
+  return null;
+}
+
 /** Turns CSV rows (first row = header) into batch items for the operation. */
 export function csvToBatchItems(rows: string[][], op: OperationInfo, maxItems: number): ParsedBatch {
   const errors: string[] = [];

@@ -1,5 +1,5 @@
 import { OperationInfo } from '../../core/operations/operations.models';
-import { buildTemplate, csvToBatchItems, fixText, itemCause, itemStatus, resultsToCsv } from './batch-csv';
+import { buildTemplate, csvToBatchItems, fixText, itemCause, itemStatus, resultsToCsv, sampleRows } from './batch-csv';
 
 const VISA_CVV2: OperationInfo = {
   id: 'visa/cvv2', network: 'visa', network_label: 'Visa', label: 'Visa CVV2', type: 'CVV2',
@@ -63,5 +63,22 @@ describe('batch CSV mapping', () => {
     expect(itemCause(result.results[2])).toBeNull();
     expect(fixText({ ...swapped, changes: [], operation: { id: 'visa/cvv', label: 'Visa CVV', type: 'CVV' } }))
       .toBe('it is the Visa CVV');
+  });
+
+  it('builds sample rows that show every outcome, including a mismatch with a known cause', () => {
+    const cvv2 = { ...VISA_CVV2, example_result: '597' };
+    expect(sampleRows(cvv2)).toEqual([
+      ['ref', 'pan', 'expiry', 'received'],
+      ['generate', '4111111111111111', '3012', ''],
+      ['match', '4111111111111111', '3012', '597'],
+      ['pan-typo', '1411111111111111', '3012', '597'],
+      ['unknown-value', '4111111111111111', '3012', '999']]);
+    const arpc = { ...VISA_CVV2, id: 'visa/arpc', example_result: 'C837D13061C1E896',
+                   fields: [{ name: 'arqc', label: 'ARQC', example: '37858601E2285A5D' }, { name: 'tag_8a', label: '8A', example: '3030' }] };
+    expect(sampleRows(arpc)[3]).toEqual(['response-code-raw', '37858601E2285A5D', '0000', 'C837D13061C1E896']);
+    const arqc = { ...VISA_CVV2, id: 'discover/arqc', example_result: '37858601E2285A5D',
+                   fields: [{ name: 'tag_9f36', label: 'ATC', example: '0001' }] };
+    expect(sampleRows(arqc)[3]).toEqual(['counter-moved-on', '0002', '37858601E2285A5D']);
+    expect(sampleRows(arqc)[4][2]).toBe('0123456789ABCDEF');
   });
 });

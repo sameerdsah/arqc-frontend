@@ -30,7 +30,7 @@
         <label for="csvFile">Upload your CSV file</label>
         <div class="row">
           <input type="file" id="csvFile" accept=".csv,text/csv" (change)="onFileSelected($event)">
-          <button type="button" class="link-btn" (click)="loadSampleRows()">or try with sample rows</button>
+          <button type="button" class="link-btn" (click)="loadSampleRows()" title="Generated, Match, a mismatch with a known cause and one without">or try with sample rows</button>
         </div>
         @if (fileError()) {
           <p class="error">{{ fileError() }}</p>
