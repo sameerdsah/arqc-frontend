@@ -136,4 +136,43 @@ describe('EmvArqcForm', () => {
     expect(req.request.body.tag_9f02).toBe('000000010000');
     req.flush({ result: '949BBD6013450C7D', type: 'ARQC' });
   });
+
+  it('compares a received ARQC, explains the mismatch and fixes it in one click', async () => {
+    component.received = '673A05ED91892AF8';            // the card's ARQC, e.g. from a terminal log
+    await fillAndSubmit(VALID_ARQC_INPUT);
+    httpMock.expectOne('/api/visa/arqc').flush({ result: '949BBD6013450C7D', type: 'ARQC' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.outcome.bad')?.textContent).toContain('No match');
+
+    httpMock.expectOne('/api/operations').flush({ max_batch_items: 500, operations: [
+      { id: 'visa/arqc', path: '/api/visa/arqc', network: 'visa', network_label: 'Visa', label: 'Visa ARQC', type: 'ARQC',
+        result_format: '16 hex characters', result_pattern: '^[0-9A-F]{16}$', fields: [] }] });
+    const verify = httpMock.expectOne('/api/verify');
+    expect(verify.request.body.input.tag_9f36).toBe('0001');
+    verify.flush({ operation: 'visa/arqc', type: 'ARQC', valid: false, expected: '949BBD6013450C7D', received: '673A05ED91892AF8',
+                   diagnosis: { checked: 1, findings: [{ cause: 'atc-drift', confidence: 'certain',
+                     explanation: 'The received cryptogram belongs to a later transaction.',
+                     changes: [{ field: 'tag_9f36', label: 'Tag 9F36 (Application Transaction Counter)', from: '0001', to: '0002' }] }] } });
+    fixture.detectChanges();
+    fixture.nativeElement.querySelector('.apply-btn').click();
+    fixture.detectChanges();
+
+    const again = httpMock.expectOne('/api/visa/arqc');
+    expect(again.request.body.tag_9f36).toBe('0002');
+    again.flush({ result: '673A05ED91892AF8', type: 'ARQC' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.outcome.ok')?.textContent).toContain('Matched after the change');
+    expect(component.arqcRequest['tag_9f36']).toBe('0002');
+  });
+
+  it('takes the received ARQC from the chip data (9F26) when the page has an example ARQC', async () => {
+    fixture.componentRef.setInput('config', { ...CONFIG, exampleResult: '949BBD6013450C7D' });
+    fixture.detectChanges();
+    fixture.debugElement.query(By.css('.toggle')).nativeElement.click();
+    fixture.detectChanges();
+    fixture.debugElement.query(By.css('app-chip-data-paste .link-btn')).nativeElement.click();
+    fixture.detectChanges();
+    expect(component.received).toBe('949BBD6013450C7D');
+    expect(component.arqcRequest['arqc']).toBeUndefined();
+  });
 });

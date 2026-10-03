@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
 import { ExampleValuesLink } from '../example-values-link/example-values-link';
 import { friendlyErrorMessage } from '../api-error';
+import { ReceivedValueCheck } from '../received-check/received-check';
+import { Calculation } from '../../core/operations/operations.models';
 
 /** Settings for one card verification page, e.g. Visa CVV2 or Mastercard Chip CVC. */
 export interface CardValueConfig {
@@ -23,7 +25,7 @@ export interface CardValueConfig {
  */
 @Component({
   selector: 'app-card-value-generator',
-  imports: [FormsModule, CommonModule, ExampleValuesLink],
+  imports: [FormsModule, CommonModule, ExampleValuesLink, ReceivedValueCheck],
   templateUrl: './card-value-generator.html',
   styleUrl: './card-value-generator.css'
 })
@@ -32,6 +34,10 @@ export class CardValueGenerator implements OnChanges {
   @Input({ required: true }) config!: CardValueConfig;
 
   cardRequest = { pan: '', expiry: '', service_code: '' };
+
+  /** "Compare with a value you received": the value to check and the last calculation. */
+  received = '';
+  calculation: Calculation | null = null;
 
   response: any = null;
   isSubmitting = false;
@@ -43,6 +49,8 @@ export class CardValueGenerator implements OnChanges {
   // Moving to another value's page starts with a clean form
   ngOnChanges() {
     this.cardRequest = { pan: '', expiry: '', service_code: '' };
+    this.received = '';
+    this.calculation = null;
     this.response = null;
     this.isError = false;
     this.error_response = null;
@@ -57,9 +65,17 @@ export class CardValueGenerator implements OnChanges {
     const card = this.config.example
       ?? { pan: this.config.apiUrl.includes('/mastercard/') ? '5555555555554444' : '4111111111111111', expiry: '3012' };
     this.cardRequest = { ...card, service_code: this.config.needsServiceCode ? '101' : '' };
+    this.calculation = null;
     this.response = null;
     this.isError = false;
     this.error_response = null;
+  }
+
+  /** Applies a fix found by the Mismatch Explainer (e.g. another service code) and recalculates. */
+  applyChanges(changes: Record<string, string>) {
+    const { pan, expiry, service_code } = { ...this.cardRequest, ...changes };
+    this.cardRequest = { pan, expiry, service_code };
+    this.calculate();
   }
 
   submitForm(form: NgForm) {
@@ -67,8 +83,12 @@ export class CardValueGenerator implements OnChanges {
       form.control.markAllAsTouched();
       return;
     }
+    this.calculate();
+  }
 
+  private calculate() {
     this.response = null;
+    this.calculation = null;
     this.isError = false;
     this.error_response = null;
     this.isSubmitting = true;
@@ -84,8 +104,9 @@ export class CardValueGenerator implements OnChanges {
         this.cdr.detectChanges();
       })
     ).subscribe({
-      next: (data) => {
+      next: (data: any) => {
         this.response = data;
+        this.calculation = data?.result ? { input: body, result: data.result } : null;
         this.cdr.detectChanges();
       },
       error: (err) => {

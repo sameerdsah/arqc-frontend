@@ -18,6 +18,7 @@ export class ArqcGenerator {
     title: 'ARQC Generator',
     subtitle: 'Authorization Request Cryptogram — Application Cryptogram (9F26)',
     apiUrl: '/api/arqc',
-    fields: DISCOVER_ARQC_FIELDS
+    fields: DISCOVER_ARQC_FIELDS,
+    exampleResult: '37858601E2285A5D'
   };
 }

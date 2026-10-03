@@ -1,0 +1,16 @@
+:host { display: block; margin-top: 18px; text-align: left; }
+.check-toggle { width: 100%; background: #f6f8fb; color: #1976d2; border: 1px dashed #9db8dc; border-radius: 4px;
+                padding: 9px 12px; cursor: pointer; font-size: 0.9rem; text-align: left; }
+.check-toggle:hover { background: #eef4fb; }
+.panel { border: 1px solid #d0dbe8; border-radius: 6px; padding: 12px; background: #fbfcfe; }
+.head { display: flex; justify-content: space-between; align-items: baseline; gap: 4px 12px; margin-bottom: 6px; }
+label { font-weight: 600; }
+.hint { font-weight: 400; color: #666; font-size: 0.85rem; }
+.link-btn { background: none; border: none; color: #1976d2; padding: 0; cursor: pointer; font-size: 0.85rem; width: auto; }
+.link-btn:hover { text-decoration: underline; background: none; }
+input { width: 100%; padding: 10px; border: 1px solid #cfcfcf; border-radius: 4px; box-sizing: border-box;
+        font-family: 'Courier New', Courier, monospace; font-size: 1rem; letter-spacing: 1px; }
+input:focus { outline: none; border-color: #1976d2; }
+input[aria-invalid=true] { border-color: #d93025; }
+.error { color: red; font-size: 12px; margin-top: 4px; }
+.hint-line { display: block; margin-top: 6px; color: #555; }

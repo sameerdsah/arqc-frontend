@@ -16,11 +16,4 @@ button[type=submit]:hover { background: #0d5bbc; }
 .btn-disabled-look, .btn-disabled-look:hover { background: #cfcfcf !important; color: #888; cursor: not-allowed; }
 .error { color: red; font-size: 12px; }
 .response-error { color: red; margin: 16px 0 0; }
-.outcome { margin-top: 20px; padding: 14px 16px; border-radius: 6px; border: 1px solid; }
-.outcome.ok { background: #e9f7ef; border-color: #b7e1c6; color: #177245; }
-.outcome.bad { background: #fff0f0; border-color: #f2c7c3; color: #b42318; }
-.values { display: flex; gap: 12px; align-items: baseline; margin-top: 8px; color: #333; }
-.values span:first-child { min-width: 70px; font-size: 0.85rem; color: #555; }
-code { font-family: 'Courier New', Courier, monospace; font-size: 1.05rem; letter-spacing: 1px; color: #0d47a1; }
-.diff { background: #fde2e1; color: #b42318; font-weight: 700; border-radius: 2px; }
 small { display: block; margin-top: 8px; color: #555; }

@@ -80,7 +80,8 @@ describe('VerifyValue', () => {
     type('#received', '597');
     submit();
     const req = http.expectOne('/api/verify');
-    expect(req.request.body).toEqual({ operation: 'visa/cvv2', input: { pan: '4111111111111111', expiry: '3012' }, received: '597' });
+    expect(req.request.body).toEqual({ operation: 'visa/cvv2', input: { pan: '4111111111111111', expiry: '3012' }, received: '597',
+                                       diagnose: true });
     req.flush({ operation: 'visa/cvv2', type: 'CVV2', valid: true, expected: '597', received: '597' });
     fixture.detectChanges();
     expect(el.querySelector('.outcome.ok')?.textContent).toContain('Match');
@@ -96,6 +97,26 @@ describe('VerifyValue', () => {
     expect(outcome.textContent).toContain('No match');
     expect(outcome.textContent).toContain('597');
     expect(outcome.querySelectorAll('.diff').length).toBe(1);
+  });
+
+  it('explains a mismatch and applies the fix in one click', () => {
+    component.useExampleValues();
+    type('#received', '598');
+    submit();
+    const finding = { cause: 'pan-transposition', confidence: 'possible', note: 'chance', explanation: 'Two PAN digits are swapped.',
+                      changes: [{ field: 'pan', label: 'Tag 5A (PAN)', from: '4111111111111111', to: '1411111111111111' }] };
+    http.expectOne('/api/verify').flush({ operation: 'visa/cvv2', type: 'CVV2', valid: false, expected: '597', received: '598',
+                                          diagnosis: { checked: 3, findings: [finding] } });
+    fixture.detectChanges();
+    expect(el.querySelector('.finding')?.textContent).toContain('Two PAN digits are swapped.');
+    (el.querySelector('.apply-btn') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const again = http.expectOne('/api/verify');
+    expect(again.request.body.input.pan).toBe('1411111111111111');
+    again.flush({ operation: 'visa/cvv2', type: 'CVV2', valid: true, expected: '598', received: '598' });
+    fixture.detectChanges();
+    expect(el.querySelector('.outcome.ok')?.textContent).toContain('Matched after the change');
+    expect((el.querySelector('#f-pan') as HTMLInputElement).value).toBe('1411111111111111');
   });
 
   it('shows friendly API errors', () => {

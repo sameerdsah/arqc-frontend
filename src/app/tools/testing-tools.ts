@@ -11,7 +11,7 @@ export interface TestingTool {
 }
 
 export const TESTING_TOOLS: TestingTool[] = [
-  { slug: 'verify', label: 'Verify a Value', description: 'Check an ARQC, ARPC or CVV received from a card, terminal or simulator', component: VerifyValue },
+  { slug: 'verify', label: 'Verify a Value', description: 'Check an ARQC, ARPC or CVV you received: Match or No match, and the likely cause', component: VerifyValue },
   { slug: 'batch', label: 'Batch Generation', description: 'Generate or verify up to 500 values from a CSV file', component: BatchGeneration }
 ];
 

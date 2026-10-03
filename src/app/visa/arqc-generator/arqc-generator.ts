@@ -22,6 +22,7 @@ export class VisaArqcGenerator {
       iadPattern: '^(?:[0-9A-Fa-f]{2}){7,32}$',
       aip: '3C00',
       exampleIad: '06010A03A00000'
-    })
+    }),
+    exampleResult: '949BBD6013450C7D'
   };
 }

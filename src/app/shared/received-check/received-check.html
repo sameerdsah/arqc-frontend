@@ -1,0 +1,26 @@
+@if (!expanded()) {
+  <button type="button" class="check-toggle" (click)="open()">&#9654; Compare with a value you received (optional)</button>
+} @else {
+  <div class="panel">
+    <div class="head">
+      <label for="received">Received {{ valueName() }}
+        <span class="hint">from a card, terminal or host log{{ format() ? ' (' + format()!.description + ')' : '' }}</span>
+      </label>
+      <button type="button" class="link-btn" (click)="close()">Close</button>
+    </div>
+    <input type="text" id="received" name="received" autocomplete="off" spellcheck="false"
+           [value]="received()" (input)="setReceived($any($event.target).value)"
+           [attr.aria-invalid]="formatError()" placeholder="Paste the value to check">
+    @if (formatError()) {
+      <div class="error">Please enter {{ format()!.description }}</div>
+    } @else if (!calculation() && value()) {
+      <small class="hint-line">Press Submit: the {{ valueName() }} is calculated and compared with this value.</small>
+    }
+
+    @if (compared(); as c) {
+      <app-check-outcome [type]="valueName()" [expected]="c.expected" [received]="c.received"
+                         [explanation]="explanation()" [applied]="applied()" [report]="report()"
+                         (apply)="applyFinding($event)"></app-check-outcome>
+    }
+  </div>
+}

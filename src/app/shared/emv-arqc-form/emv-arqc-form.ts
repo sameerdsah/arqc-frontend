@@ -7,6 +7,8 @@ import { friendlyErrorMessage } from '../api-error';
 import { ChipDataPaste } from '../chip-data-paste/chip-data-paste';
 import { exampleChipDataFor } from '../../core/emv/chip-examples';
 import { ExampleValuesLink } from '../example-values-link/example-values-link';
+import { ReceivedValueCheck } from '../received-check/received-check';
+import { Calculation } from '../../core/operations/operations.models';
 
 /** Settings for one network's ARQC page: Discover, Visa or Mastercard. */
 export interface EmvArqcConfig {
@@ -14,6 +16,7 @@ export interface EmvArqcConfig {
   subtitle: string;    // full name shown under the heading
   apiUrl: string;      // backend endpoint, e.g. '/api/visa/arqc'
   fields: EmvField[];  // the EMV tags this network's ARQC uses, in screen order
+  exampleResult?: string;  // ARQC of the example values: the example chip data then carries it in 9F26
 }
 
 /** What differs between Visa and Mastercard in the full EMV data set. */
@@ -63,7 +66,7 @@ export function fullEmvDataSet(config: SchemeEmvSettings): EmvField[] {
  */
 @Component({
   selector: 'app-emv-arqc-form',
-  imports: [FormsModule, CommonModule, ChipDataPaste, ExampleValuesLink],
+  imports: [FormsModule, CommonModule, ChipDataPaste, ExampleValuesLink, ReceivedValueCheck],
   templateUrl: './emv-arqc-form.html',
   styleUrl: './emv-arqc-form.css'
 })
@@ -73,8 +76,13 @@ export class EmvArqcForm implements OnChanges {
 
   fields: EmvField[] = [];
   fieldKeys: string[] = [];
+  chipTargets: string[] = [];   // the fields plus 'arqc': the card's ARQC (9F26) becomes the received value
   exampleChipData = '';
   arqcRequest: Record<string, string> = {};
+
+  /** "Compare with a value you received": the value to check and the last calculation. */
+  received = '';
+  calculation: Calculation | null = null;
 
   response: any = null;
   isSubmitting = false;
@@ -86,8 +94,12 @@ export class EmvArqcForm implements OnChanges {
   ngOnChanges() {
     this.fields = this.config.fields;
     this.fieldKeys = this.fields.map(f => f.key);
-    this.exampleChipData = exampleChipDataFor(this.fields.map(f => ({ name: f.key, example: f.example })), [['9F27', '80']]);
+    this.chipTargets = [...this.fieldKeys, 'arqc'];
+    const cryptogram: [string, string][] = this.config.exampleResult ? [['9F26', this.config.exampleResult]] : [];
+    this.exampleChipData = exampleChipDataFor(this.fields.map(f => ({ name: f.key, example: f.example })),
+                                              [...cryptogram, ['9F27', '80']]);
     this.arqcRequest = Object.fromEntries(this.fields.map(f => [f.key, '']));
+    this.received = '';
     this.clearResult();
   }
 
@@ -99,11 +111,23 @@ export class EmvArqcForm implements OnChanges {
 
   /** Values read from pasted chip data (field 55) replace the matching fields. */
   applyChipData(values: Record<string, string>) {
-    this.arqcRequest = { ...this.arqcRequest, ...values };
+    const { arqc, ...fields } = values;
+    this.arqcRequest = { ...this.arqcRequest, ...fields };
+    if (arqc) {
+      this.received = arqc;   // the card's own ARQC: Submit then checks it
+    }
     this.clearResult();
   }
 
+  /** Applies a fix found by the Mismatch Explainer (e.g. the next transaction counter) and recalculates. */
+  applyChanges(changes: Record<string, string>) {
+    const known = Object.entries(changes).filter(([key]) => this.fieldKeys.includes(key));
+    this.arqcRequest = { ...this.arqcRequest, ...Object.fromEntries(known) };
+    this.calculate();
+  }
+
   private clearResult() {
+    this.calculation = null;
     this.response = null;
     this.isError = false;
     this.error_response = null;
@@ -114,20 +138,23 @@ export class EmvArqcForm implements OnChanges {
       form.control.markAllAsTouched();
       return;
     }
+    this.calculate();
+  }
 
-    this.response = null;
-    this.isError = false;
-    this.error_response = null;
+  private calculate() {
+    this.clearResult();
     this.isSubmitting = true;
+    const body = { ...this.arqcRequest };
 
-    this.http.post(this.config.apiUrl, this.arqcRequest).pipe(
+    this.http.post(this.config.apiUrl, body).pipe(
       finalize(() => {
         this.isSubmitting = false;
         this.cdr.detectChanges();
       })
     ).subscribe({
-      next: (data) => {
+      next: (data: any) => {
         this.response = data;
+        this.calculation = data?.result ? { input: body, result: data.result } : null;
         this.cdr.detectChanges();
       },
       error: (err) => {

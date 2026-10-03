@@ -1,6 +1,6 @@
 <div class="container">
   <h2>Verify a Value</h2>
-  <p class="subtitle">Check a value received from a card, terminal or simulator</p>
+  <p class="subtitle">Check a value received from a card, terminal or simulator &ndash; and find out why it does not match</p>
 
   @if (loadError()) {
     <p class="response-error"><strong>Unable to load the list of values</strong><br><small>{{ loadError() }}</small></p>
@@ -56,21 +56,9 @@
       </form>
 
       @if (result(); as r) {
-        @if (r.valid) {
-          <div class="outcome ok" role="status">
-            <strong>&#10004; Match</strong> &ndash; the received {{ r.type }} is correct.
-            <div class="values"><span>Value</span><code>{{ r.received }}</code></div>
-          </div>
-        } @else {
-          <div class="outcome bad" role="status">
-            <strong>&#10008; No match</strong> &ndash; the received {{ r.type }} is not the expected value.
-            <div class="values"><span>Expected</span><code>{{ r.expected }}</code></div>
-            <div class="values"><span>Received</span>
-              <code>@for (c of diff(); track $index) {<span [class.diff]="!c.same">{{ c.char }}</span>}</code>
-            </div>
-            <small>Differences are highlighted. Check the input data, the cryptogram version and the key.</small>
-          </div>
-        }
+        <app-check-outcome [type]="r.type" [expected]="r.expected" [received]="r.received"
+                           [explanation]="explanation()" [applied]="applied()" [report]="report()"
+                           (apply)="applyFinding($event)"></app-check-outcome>
       }
       @if (error()) {
         <p class="response-error"><strong>Unable to verify the {{ op.type }}</strong><br><small>{{ error() }}</small></p>

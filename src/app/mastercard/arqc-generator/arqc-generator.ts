@@ -22,6 +22,7 @@ export class MastercardArqcGenerator {
       iadPattern: '^(?:[0-9A-Fa-f]{2}){8,32}$',
       aip: '1800',
       exampleIad: '0110A00003220000000000000000000000FF'
-    })
+    }),
+    exampleResult: '9B855F941F555627'
   };
 }

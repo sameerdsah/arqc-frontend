@@ -3,29 +3,25 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 import { OperationsService } from '../../core/operations/operations.service';
 import {
-  groupByNetwork, OperationGroup, OperationInfo, VerifyResult
+  DiagnosisFinding, Explanation, groupByNetwork, OperationGroup, OperationInfo, VerifyResult
 } from '../../core/operations/operations.models';
+import { changesOf, checkReport, IDLE, isApplied } from '../../core/operations/value-check';
 import { friendlyErrorMessage } from '../../shared/api-error';
 import { ChipDataPaste } from '../../shared/chip-data-paste/chip-data-paste';
+import { CheckOutcome } from '../../shared/check-outcome/check-outcome';
 import { exampleChipData } from '../../core/emv/chip-examples';
 
-export interface DiffChar {
-  char: string;
-  same: boolean;
-}
-
-/** Marks each character of `received` that differs from `expected` (same position). */
-export function compareChars(expected: string, received: string): DiffChar[] {
-  return [...received].map((char, i) => ({ char, same: expected[i] === char }));
-}
+export { compareChars } from '../../core/operations/value-check';
+export type { DiffChar } from '../../core/operations/value-check';
 
 /**
  * Verify a value received from a card, terminal or simulator (ARQC, ARPC, CVV ...).
  * The form is built from the operation catalogue, so it works for every value the API offers.
+ * A mismatch is explained by the Mismatch Explainer: the most likely cause, applied in one click.
  */
 @Component({
   selector: 'app-verify-value',
-  imports: [ChipDataPaste],
+  imports: [ChipDataPaste, CheckOutcome],
   templateUrl: './verify-value.html',
   styleUrl: './verify-value.css'
 })
@@ -69,9 +65,21 @@ export class VerifyValue {
     const op = this.selected();
     return op ? exampleChipData(op) : '';
   });
-  readonly diff = computed(() => {
+  /** The explanation the API returned with a mismatch. */
+  readonly explanation = computed<Explanation>(() => {
     const r = this.result();
-    return r && !r.valid ? compareChars(r.expected, r.received) : [];
+    return r && !r.valid && r.diagnosis ? { status: 'done', diagnosis: r.diagnosis } : IDLE;
+  });
+  private readonly appliedFinding = signal<DiagnosisFinding | null>(null);
+  readonly applied = computed(() => {
+    const finding = this.appliedFinding();
+    return this.result()?.valid && isApplied(finding, this.values()) ? finding : null;
+  });
+  readonly report = computed(() => {
+    const r = this.result();
+    const op = this.selected();
+    return r && op ? checkReport({ value: `${op.label} (${op.id})`, input: this.input(op), expected: r.expected,
+                                   received: r.received, explanation: this.explanation() }) : '';
   });
 
   constructor() {
@@ -103,6 +111,27 @@ export class VerifyValue {
   setReceived(value: string) {
     this.received.set(value);
     this.clearOutcome();
+  }
+
+  /**
+   * Applies the Mismatch Explainer's finding and verifies again: either the input changes
+   * (e.g. 9F36 0001 -> 0002) or another value of the same card (e.g. the CID, not the CVV),
+   * keeping the inputs and the received value.
+   */
+  applyFinding(finding: DiagnosisFinding) {
+    if (finding.operation) {
+      const target = this.operations().find(op => op.id === finding.operation!.id);
+      if (!target) {
+        return;
+      }
+      const keep = new Set(target.fields.map(f => f.name));
+      this.selectedId.set(target.id);
+      this.values.update(v => Object.fromEntries(Object.entries(v).filter(([name]) => keep.has(name))));
+    } else {
+      this.values.update(v => ({ ...v, ...changesOf(finding) }));
+    }
+    this.verify();
+    this.appliedFinding.set(finding);
   }
 
   useExampleValues() {
@@ -139,8 +168,7 @@ export class VerifyValue {
     }
     this.clearOutcome();
     this.busy.set(true);
-    const input = Object.fromEntries(op.fields.map(f => [f.name, (this.values()[f.name] ?? '').trim()]));
-    this.api.verify({ operation: op.id, input, received: this.received().trim() })
+    this.api.verify({ operation: op.id, input: this.input(op), received: this.received().trim(), diagnose: true })
       .pipe(finalize(() => this.busy.set(false)))
       .subscribe({
         next: result => this.result.set(result),
@@ -148,8 +176,13 @@ export class VerifyValue {
       });
   }
 
+  private input(op: OperationInfo): Record<string, string> {
+    return Object.fromEntries(op.fields.map(f => [f.name, (this.values()[f.name] ?? '').trim()]));
+  }
+
   private clearOutcome() {
     this.result.set(null);
     this.error.set(null);
+    this.appliedFinding.set(null);
   }
 }

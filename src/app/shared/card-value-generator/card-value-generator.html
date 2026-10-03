@@ -51,4 +51,7 @@
     </p>
   </div>
 
+  <app-received-check [path]="config.apiUrl" [valueName]="config.valueName" [calculation]="calculation"
+                      [(received)]="received" (apply)="applyChanges($event)"></app-received-check>
+
 </div>

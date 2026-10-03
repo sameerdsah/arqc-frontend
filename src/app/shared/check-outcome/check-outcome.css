@@ -1,0 +1,43 @@
+:host { display: block; }
+.outcome { margin-top: 16px; padding: 14px 16px; border-radius: 6px; border: 1px solid; text-align: left; }
+.outcome.ok { background: #e9f7ef; border-color: #b7e1c6; color: #177245; }
+.outcome.bad { background: #fff0f0; border-color: #f2c7c3; color: #b42318; }
+.values { display: flex; gap: 12px; align-items: baseline; margin-top: 8px; color: #333; }
+.values span:first-child { min-width: 70px; font-size: 0.85rem; color: #555; }
+code { font-family: 'Courier New', Courier, monospace; font-size: 1.05rem; letter-spacing: 1px; color: #0d47a1; }
+.diff { background: #fde2e1; color: #b42318; font-weight: 700; border-radius: 2px; }
+small { display: block; margin-top: 6px; color: #555; }
+.applied { margin: 10px 0 0; color: #333; }
+.change { display: inline-block; margin-left: 6px; }
+
+.explain { margin: 12px 0 0; color: #333; }
+.muted { color: #555; }
+.none { padding: 10px 12px; background: #fff; border: 1px dashed #d8b4b0; border-radius: 6px; }
+.spinner { display: inline-block; width: 12px; height: 12px; margin-right: 8px; vertical-align: -1px;
+           border: 2px solid #c7d4e6; border-top-color: #1976d2; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+
+.finding { margin-top: 12px; padding: 12px 14px; background: #fff; border: 1px solid #c9dcf3; border-left: 4px solid #1976d2;
+           border-radius: 6px; color: #1f2937; }
+.finding.possible { border-color: #f1d9a6; border-left-color: #c77700; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem; font-weight: 700;
+         letter-spacing: .03em; text-transform: uppercase; background: #e3efff; color: #0d47a1; }
+.possible .badge { background: #fff3dc; color: #8a5300; }
+.why { margin: 8px 0 0; }
+.changes { list-style: none; margin: 8px 0 0; padding: 0; }
+.changes li { margin: 4px 0; }
+.lbl { font-size: 0.85rem; color: #555; }
+.from { color: #b42318; text-decoration: line-through; }
+.to { color: #177245; font-weight: 700; }
+.note { color: #8a5300; }
+.apply-btn { margin-top: 10px; width: auto; padding: 8px 14px; background: #1976d2; color: #fff; border: none; border-radius: 4px;
+             cursor: pointer; font-size: 0.9rem; }
+.apply-btn:hover { background: #0d5bbc; }
+.apply-btn:focus-visible, .copy-btn:focus-visible { outline: 2px solid #0d47a1; outline-offset: 2px; }
+
+.tools { margin-top: 12px; text-align: right; }
+.copy-btn { width: auto; padding: 0; background: none; border: none; color: #1976d2; cursor: pointer; font-size: 0.85rem; }
+.copy-btn:hover { text-decoration: underline; background: none; }
+.report { margin: 6px 0 0; padding: 8px; background: #fff; border: 1px solid #d0d7e2; border-radius: 4px; color: #333;
+          font-size: 0.8rem; white-space: pre-wrap; user-select: all; }

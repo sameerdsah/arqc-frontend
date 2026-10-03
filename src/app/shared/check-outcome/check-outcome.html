@@ -1,0 +1,66 @@
+<div class="outcome" [class.ok]="match()" [class.bad]="!match()" role="status" aria-live="polite">
+  @if (match()) {
+    <strong class="verdict">&#10004; Match</strong> &ndash; the received {{ type() }} is correct.
+    <div class="values"><span>Value</span><code>{{ received() }}</code></div>
+    @if (applied(); as f) {
+      <p class="applied">Matched after the change:
+        @for (c of f.changes; track c.field) {
+          <span class="change"><span class="lbl">{{ c.label }}</span> <code class="from">{{ c.from }}</code> &rarr; <code class="to">{{ c.to }}</code></span>
+        }
+      </p>
+    }
+  } @else {
+    <strong class="verdict">&#10008; No match</strong> &ndash; the received {{ type() }} is not the expected value.
+    <div class="values"><span>Expected</span><code>{{ expected() }}</code></div>
+    <div class="values"><span>Received</span>
+      <code>@for (c of diff(); track $index) {<span [class.diff]="!c.same">{{ c.char }}</span>}</code>
+    </div>
+    <small class="count">{{ differing() }} of {{ received().length }} characters differ.</small>
+
+    @switch (explanation().status) {
+      @case ('loading') {
+        <p class="explain muted"><span class="spinner" aria-hidden="true"></span>Looking for the cause&hellip;</p>
+      }
+      @case ('error') {
+        <p class="explain muted">The cause could not be checked. Please try again.</p>
+      }
+      @case ('done') {
+        @if (finding(); as f) {
+          <div class="finding" [class.possible]="f.confidence === 'possible'">
+            <span class="badge">{{ f.confidence === 'certain' ? 'Cause found' : 'Possible cause' }}</span>
+            <p class="why">{{ f.explanation }}</p>
+            @if (f.changes.length) {
+              <ul class="changes">
+                @for (c of f.changes; track c.field) {
+                  <li><span class="lbl">{{ c.label }}</span> <code class="from">{{ c.from }}</code> &rarr; <code class="to">{{ c.to }}</code></li>
+                }
+              </ul>
+            }
+            @if (f.note) {
+              <small class="note">{{ f.note }}</small>
+            }
+            @if (actionLabel(f); as label) {
+              <button type="button" class="apply-btn" (click)="apply.emit(f)">{{ label }}</button>
+            }
+          </div>
+        } @else {
+          <p class="explain none">
+            We recalculated {{ checked() }} variants of the input &ndash; transaction counter, swapped codes, dates,
+            amounts, response code and other values of the card &ndash; and none gives the received value.
+            The remaining usual causes are a different key, cryptogram version or card.
+          </p>
+        }
+      }
+    }
+  }
+
+  @if (report()) {
+    <div class="tools">
+      <button type="button" class="copy-btn" (click)="copy()">{{ copied() ? '✔ Copied' : 'Copy check report' }}</button>
+    </div>
+    @if (copyBlocked()) {
+      <p class="muted">The browser blocked copying. Select the text below and copy it.</p>
+      <pre class="report">{{ report() }}</pre>
+    }
+  }
+</div>

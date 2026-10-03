@@ -28,6 +28,7 @@ export interface VerifyRequest {
   operation: string;
   input: Record<string, string>;
   received: string;
+  diagnose?: boolean;      // explain a mismatch (Mismatch Explainer); counts as 2 requests
 }
 
 export interface VerifyResult {
@@ -36,7 +37,44 @@ export interface VerifyResult {
   valid: boolean;
   expected: string;
   received: string;
+  diagnosis?: Diagnosis;   // only when diagnose was requested and the value does not match
 }
+
+/** One input change that reproduces the received value, e.g. 9F36 0001 -> 0002. */
+export interface DiagnosisChange {
+  field: string;           // API field name, e.g. 'tag_9f36'
+  label: string;           // e.g. 'Tag 9F36 (Application Transaction Counter)'
+  from: string;
+  to: string;
+}
+
+/** The most likely cause of a mismatch, found by recalculating well-known mistakes. */
+export interface DiagnosisFinding {
+  cause: string;                       // e.g. 'atc-drift', 'other-value', 'received-is-input'
+  explanation: string;                 // plain English, ready to show
+  confidence: 'certain' | 'possible';  // 'possible' for short values (3 digits) that can match by chance
+  note?: string;
+  changes: DiagnosisChange[];          // empty when the input is right but the value is something else
+  operation?: { id: string; label: string; type: string };   // the received value is this other value of the card
+}
+
+export interface Diagnosis {
+  checked: number;                     // variants recalculated
+  findings: DiagnosisFinding[];        // empty: none of the known causes explains it
+}
+
+/** What a generator page calculated, and from which input (the basis of a received-value check). */
+export interface Calculation {
+  input: Record<string, string>;
+  result: string;
+}
+
+/** State of the explanation of a mismatch, as shown to the user. */
+export type Explanation =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'done'; diagnosis: Diagnosis }
+  | { status: 'error'; message: string };
 
 export interface BatchItem {
   ref?: string;

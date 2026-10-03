@@ -149,4 +149,18 @@ describe('CardValueGenerator', () => {
     fixture.detectChanges();
     expect(component.cardRequest).toEqual({ pan: '4123456789012345', expiry: '8701', service_code: '101' });
   });
+
+  it('compares the calculated value with a received one, with no extra request for a match', async () => {
+    await create(VISA_CVV);
+    fixture.nativeElement.querySelector('.check-toggle').click();
+    fixture.detectChanges();
+    const received = fixture.nativeElement.querySelector('#received') as HTMLInputElement;
+    received.value = '561';
+    received.dispatchEvent(new Event('input'));
+    await fillAndSubmit({ '#pan': '4123456789012345', '#expiry': '8701', '#serviceCode': '101' });
+    httpMock.expectOne('/api/visa/cvv').flush({ result: '561', type: 'CVV' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.outcome.ok')?.textContent).toContain('Match');
+    expect(fixture.nativeElement.textContent).toContain('Copy check report');
+  });
 });

@@ -80,4 +80,18 @@ describe('ArpcForm', () => {
     await fixture.whenStable();
     expect(component.arpcRequest).toEqual({ arqc: '37858601E2285A5D', tag_8a: '3030' });
   });
+
+  it('checks the ARPC from the host response (91) after Submit', async () => {
+    fixture.debugElement.query(By.css('.toggle')).nativeElement.click();
+    fixture.detectChanges();
+    fixture.debugElement.query(By.css('app-chip-data-paste .link-btn')).nativeElement.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.received).toBe('C837D13061C1E896');
+    fixture.debugElement.query(By.css('form')).nativeElement.dispatchEvent(new Event('submit'));
+    fixture.detectChanges();
+    httpMock.expectOne('/api/mastercard/arpc').flush({ result: 'C837D13061C1E896', type: 'ARPC' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('.outcome.ok')?.textContent).toContain('Match');
+  });
 });
