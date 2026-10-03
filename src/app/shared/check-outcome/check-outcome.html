@@ -5,7 +5,7 @@
     @if (applied(); as f) {
       <p class="applied">Matched after the change:
         @for (c of f.changes; track c.field) {
-          <span class="change"><span class="lbl">{{ c.label }}</span> <code class="from">{{ c.from }}</code> &rarr; <code class="to">{{ c.to }}</code></span>
+          <span class="change"><span class="lbl">{{ c.label }}</span><code class="from">{{ c.from }}</code><span class="arrow">&rarr;</span><code class="to">{{ c.to }}</code></span>
         }
       </p>
     }
@@ -15,7 +15,13 @@
     <div class="values"><span>Received</span>
       <code>@for (c of diff(); track $index) {<span [class.diff]="!c.same">{{ c.char }}</span>}</code>
     </div>
-    <small class="count">{{ differing() }} of {{ received().length }} characters differ.</small>
+    @if (scrambled()) {
+      <small class="count">The whole value is different. That is normal: one changed input changes every character
+        of a cryptogram or CVV, so the cause matters more than the characters.</small>
+    } @else {
+      <small class="count">{{ differing() }} of {{ received().length }} characters differ &ndash; a typing or copying
+        mistake in the received value is likely.</small>
+    }
 
     @switch (explanation().status) {
       @case ('loading') {
@@ -32,7 +38,7 @@
             @if (f.changes.length) {
               <ul class="changes">
                 @for (c of f.changes; track c.field) {
-                  <li><span class="lbl">{{ c.label }}</span> <code class="from">{{ c.from }}</code> &rarr; <code class="to">{{ c.to }}</code></li>
+                  <li><span class="lbl">{{ c.label }}</span><span class="pair"><code class="from">{{ c.from }}</code><span class="arrow">&rarr;</span><code class="to">{{ c.to }}</code></span></li>
                 }
               </ul>
             }

@@ -43,6 +43,13 @@ describe('CheckOutcome', () => {
     expect(el.querySelector('.outcome.bad')?.textContent).toContain('No match');
     expect(el.querySelectorAll('.diff').length).toBe(1);
     expect(el.textContent).toContain('1 of 16 characters differ');
+    expect(el.textContent).toContain('typing or copying mistake');
+  });
+
+  it('explains that a completely different value is normal for a cryptogram', () => {
+    render('949BBD6013450C7D', '673A05ED91892AF8');
+    expect(el.textContent).toContain('The whole value is different. That is normal');
+    expect(el.textContent).not.toContain('characters differ');
   });
 
   it('shows that the cause is being looked for', () => {

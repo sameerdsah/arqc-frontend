@@ -30,6 +30,8 @@ export class CheckOutcome {
   readonly match = computed(() => this.expected() === this.received());
   readonly diff = computed(() => compareChars(this.expected(), this.received()));
   readonly differing = computed(() => this.diff().filter(c => !c.same).length);
+  /** Most characters differ: normal for cryptograms and CVVs, where any changed input changes the whole value. */
+  readonly scrambled = computed(() => this.differing() > this.received().length / 2);
   readonly finding = computed(() => findingOf(this.explanation()));
   readonly checked = computed(() => {
     const e = this.explanation();
