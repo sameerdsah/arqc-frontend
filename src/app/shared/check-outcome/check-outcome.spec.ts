@@ -50,6 +50,7 @@ describe('CheckOutcome', () => {
     render('949BBD6013450C7D', '673A05ED91892AF8');
     expect(el.textContent).toContain('The whole value is different. That is normal');
     expect(el.textContent).not.toContain('characters differ');
+    expect(el.querySelectorAll('.diff').length).toBe(0);
   });
 
   it('shows that the cause is being looked for', () => {

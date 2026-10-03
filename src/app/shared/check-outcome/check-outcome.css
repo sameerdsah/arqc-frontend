@@ -8,7 +8,6 @@ code { font-family: 'Courier New', Courier, monospace; font-size: 1.05rem; lette
 .diff { background: #fde2e1; color: #b42318; font-weight: 700; border-radius: 2px; }
 small { display: block; margin-top: 6px; color: #555; }
 .applied { margin: 10px 0 0; color: #333; }
-.change { display: inline-flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-left: 6px; }
 
 .explain { margin: 12px 0 0; color: #333; }
 .muted { color: #555; }

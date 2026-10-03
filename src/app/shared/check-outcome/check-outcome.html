@@ -3,17 +3,19 @@
     <strong class="verdict">&#10004; Match</strong> &ndash; the received {{ type() }} is correct.
     <div class="values"><span>Value</span><code>{{ received() }}</code></div>
     @if (applied(); as f) {
-      <p class="applied">Matched after the change:
-        @for (c of f.changes; track c.field) {
-          <span class="change"><span class="lbl">{{ c.label }}</span><code class="from">{{ c.from }}</code><span class="arrow">&rarr;</span><code class="to">{{ c.to }}</code></span>
-        }
-      </p>
+      <div class="applied">Matched after the change:
+        <ul class="changes">
+          @for (c of f.changes; track c.field) {
+            <li><span class="lbl">{{ c.label }}</span><span class="pair"><code class="from">{{ c.from }}</code><span class="arrow">&rarr;</span><code class="to">{{ c.to }}</code></span></li>
+          }
+        </ul>
+      </div>
     }
   } @else {
     <strong class="verdict">&#10008; No match</strong> &ndash; the received {{ type() }} is not the expected value.
     <div class="values"><span>Expected</span><code>{{ expected() }}</code></div>
     <div class="values"><span>Received</span>
-      <code>@for (c of diff(); track $index) {<span [class.diff]="!c.same">{{ c.char }}</span>}</code>
+      <code>@for (c of diff(); track $index) {<span [class.diff]="!c.same && !scrambled()">{{ c.char }}</span>}</code>
     </div>
     @if (scrambled()) {
       <small class="count">The whole value is different. That is normal: one changed input changes every character
