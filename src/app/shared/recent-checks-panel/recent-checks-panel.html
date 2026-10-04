@@ -1,0 +1,25 @@
+<section class="recent" aria-labelledby="recent-title">
+  <div class="head">
+    <h2 id="recent-title">Recent checks</h2>
+    @if (items().length) {
+      <button type="button" class="clear" (click)="clear()">Clear</button>
+    }
+  </div>
+  @if (items().length) {
+    <ul>
+      @for (item of items(); track item.check.link) {
+        <li>
+          <a class="item" [href]="item.check.link">
+            <span class="label">{{ item.label }}</span>
+            <span class="when">{{ item.when }}</span>
+            <span class="value">{{ item.check.received }}</span>
+            <span class="outcome" [class.ok]="item.check.outcome === 'match'" [class.bad]="item.check.outcome === 'mismatch'">{{ item.outcome }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="empty">Checks you make on any value page appear here, so you can run them again in one click.</p>
+  }
+  <p class="note">Kept in this browser only.</p>
+</section>

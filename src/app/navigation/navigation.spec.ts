@@ -2,7 +2,8 @@ import { breadcrumb, headerLinks, NETWORK_CONFIG, NETWORKS, pageTitle, parseUrl,
 
 describe('navigation (site map)', () => {
   it('reads addresses', () => {
-    expect(parseUrl('/visa/arqc')).toEqual({ network: 'visa', tool: 'arqc', testingTool: null, valid: true });
+    expect(parseUrl('/visa/arqc')).toEqual({ network: 'visa', tool: 'arqc', testingTool: null, learn: false, guide: null,
+                                            valid: true });
     expect(parseUrl('/tools/verify').testingTool).toBe('verify');
     expect(parseUrl('/mastercard/cvv').valid).toBe(false);
   });
@@ -49,4 +50,23 @@ describe('navigation (site map)', () => {
       }
     }
   });
+
+  it('knows the Learn section and its guides', () => {
+    expect(parseUrl('/learn')).toEqual({ network: null, tool: null, testingTool: null, learn: true, guide: null, valid: true });
+    expect(parseUrl('/learn/emv-tags').guide).toBe('emv-tags');
+    expect(parseUrl('/learn/nothing-here').valid).toBe(false);
+    expect(parseUrl('/learn/emv-tags/more').valid).toBe(false);
+    expect(headerLinks(parseUrl('/learn/emv-tags')).learn).toEqual(learnLink('/learn', true));
+    expect(headerLinks(parseUrl('/visa')).learn.active).toBe(false);
+    expect(breadcrumb(parseUrl('/learn')).map(c => [c.label, c.active])).toEqual([['Home', false], ['Learn', true]]);
+    expect(breadcrumb(parseUrl('/learn/emv-tags')).map(c => c.label)).toEqual(['Home', 'Learn', 'EMV tag dictionary']);
+    expect(valueSwitcher(parseUrl('/learn'))).toEqual([]);
+    expect(valueSwitcher(parseUrl('/learn/emv-tags')).filter(l => l.active).map(l => l.url)).toEqual(['/learn/emv-tags']);
+    expect(pageTitle(parseUrl('/learn'))).toBe('Learn · Cryptogram Generator');
+    expect(pageTitle(parseUrl('/learn/what-is-a-cryptogram'))).toBe('What is a cryptogram? · Cryptogram Generator');
+  });
 });
+
+function learnLink(url: string, active: boolean) {
+  return expect.objectContaining({ label: 'Learn', url, active });
+}

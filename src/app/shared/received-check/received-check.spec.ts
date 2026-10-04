@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ReceivedValueCheck } from './received-check';
 import { DiagnosisFinding, OperationCatalogue } from '../../core/operations/operations.models';
+import { RecentChecks } from '../../core/recent/recent-checks.service';
 
 const CATALOGUE: OperationCatalogue = {
   max_batch_items: 500,
@@ -135,5 +136,30 @@ describe('ReceivedValueCheck', () => {
     type('949BBD6013450C7D');
     expect(component.link()).toContain('?tag_9f36=0001&received=949BBD6013450C7D');
     expect(component.report()).toContain('Link:');
+  });
+
+  it('adds each finished check to Recent checks, with the cause once it is found', () => {
+    const recent = TestBed.inject(RecentChecks);
+    recent.clear();
+    calculated('949BBD6013450C7D');
+    component.open();
+    fixture.detectChanges();
+    type('949BBD6013450C7D');
+    TestBed.tick();
+    expect(recent.checks()[0]).toEqual(expect.objectContaining({ valueName: 'ARQC', received: '949BBD6013450C7D',
+                                                                 outcome: 'match' }));
+    expect(recent.checks()[0].link).toContain('received=949BBD6013450C7D');
+
+    type('673A05ED91892AF8');
+    http.expectOne('/api/operations').flush(CATALOGUE);
+    http.expectOne('/api/verify').flush({ operation: 'visa/arqc', type: 'ARQC', valid: false, expected: '949BBD6013450C7D',
+                                          received: '673A05ED91892AF8',
+                                          diagnosis: { checked: 1, findings: [{ ...ATC, title: 'Transaction counter (9F36)' }] } });
+    fixture.detectChanges();
+    TestBed.tick();
+    expect(recent.checks().length).toBe(2);
+    expect(recent.checks()[0]).toEqual(expect.objectContaining({ received: '673A05ED91892AF8', outcome: 'mismatch',
+                                                                 cause: 'Transaction counter (9F36)' }));
+    recent.clear();
   });
 });

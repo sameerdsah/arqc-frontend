@@ -1,10 +1,10 @@
 :host { display: block; margin-top: 28px; }
-.tools-heading { margin: 0 0 14px; font-size: 1.15rem; color: #333; text-align: center; }
+.tools-heading { margin: 0 0 14px; font-size: 1.15rem; color: var(--navy, #333); text-align: center; }
 .tools { display: flex; flex-direction: column; gap: 12px; }
 .tool-btn {
-  width: 100%; padding: 12px 16px; background: #fff; color: #1976d2;
-  border: 2px solid #1976d2; border-radius: 6px; cursor: pointer; text-align: center;
+  width: 100%; padding: 12px 16px; background: var(--surface, #fff); color: var(--primary, #1976d2);
+  border: 2px solid var(--primary, #1976d2); border-radius: 8px; cursor: pointer; text-align: center; font: inherit;
 }
-.tool-btn:hover { background: #eef5fd; }
+.tool-btn:hover { background: var(--primary-soft, #eef5fd); }
 .tool-label { display: block; font-size: 1.1rem; font-weight: 600; }
-.tool-desc { display: block; font-size: 0.8rem; color: #555; margin-top: 2px; }
+.tool-desc { display: block; font-size: 0.8rem; color: var(--text-muted, #555); margin-top: 2px; }

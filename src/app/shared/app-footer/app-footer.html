@@ -1,0 +1,22 @@
+<footer class="foot">
+  <div class="row">
+    <p class="status" [class.up]="state() === 'up'" [class.down]="state() === 'down'" role="status" [title]="statusHint">
+      <span class="dot" aria-hidden="true"></span>{{ status() }}
+    </p>
+    @if (release()) {
+      <p class="release">{{ release() }}</p>
+    }
+  </div>
+  <nav class="links" aria-label="Footer">
+    <a routerLink="/learn">Learn</a>
+    @if (online) {
+      <a href="/api/dashboard" target="_blank" rel="noopener">Status dashboard</a>
+      <a href="/api/docs" target="_blank" rel="noopener">API documentation</a>
+      <a [href]="otherEdition.url" rel="noopener" [title]="otherEdition.title">{{ otherEdition.label }}</a>
+    }
+  </nav>
+  <p class="legal">
+    <span class="keys">Test data and test keys only</span>
+    &copy; {{ year }} Opus Technologies · DNE team · a testing and validation accelerator, not for production card data.
+  </p>
+</footer>

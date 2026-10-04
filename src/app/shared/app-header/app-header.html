@@ -1,6 +1,6 @@
 <header class="bar">
   <a class="brand" routerLink="/" [attr.aria-current]="homeActive() ? 'page' : null" title="Home - all card networks">
-    <span class="mark" aria-hidden="true"></span>Cryptogram Generator
+    <span class="mark" aria-hidden="true"></span><span class="name">Cryptogram Generator</span>
   </a>
   <nav class="links" aria-label="Main">
     @for (link of networks(); track link.url) {
@@ -12,6 +12,11 @@
       <a [routerLink]="link.url" [class.active]="link.active" [attr.aria-current]="link.active ? 'page' : null"
          [title]="link.title ?? ''">{{ link.label }}</a>
     }
+    @if (learn(); as link) {
+      <a class="learn" [routerLink]="link.url" [class.active]="link.active" [attr.aria-current]="link.active ? 'page' : null"
+         [title]="link.title ?? ''">{{ link.label }}</a>
+    }
   </nav>
+  <span class="badge" title="Test data and test keys only: never use real card data">Test keys</span>
   <app-api-docs-link class="docs"></app-api-docs-link>
 </header>

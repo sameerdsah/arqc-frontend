@@ -1,4 +1,5 @@
 import { findTestingTool, TESTING_TOOLS } from '../tools/testing-tools';
+import { findGuide, GUIDES, LEARN_URL } from '../learn/learn-guides';
 
 /**
  * The site map: networks, their values and the testing tools, and everything derived from it -
@@ -26,7 +27,7 @@ export interface NetworkConfig {
 }
 
 // Each network lists the same kinds of value, in the same order, using that
-// network's own names: chip cryptogram, issuer response, the card's final
+// network's own names: chip cryptogram, issuer response, (v2) the card's final
 // cryptograms TC and AAC, stripe value, printed value, chip value (service code 999)
 // and contactless dynamic value. American Express gets TC and AAC with its ARQC.
 export const NETWORK_CONFIG: Record<Exclude<Network, null>, NetworkConfig> = {
@@ -96,8 +97,12 @@ export interface ParsedUrl {
   network: Network;
   tool: Tool;
   testingTool: string | null;   // /tools/verify, /tools/batch
+  learn: boolean;               // /learn and /learn/<guide>
+  guide: string | null;         // /learn/what-is-a-cryptogram
   valid: boolean;
 }
+
+const NOWHERE = { network: null, tool: null, testingTool: null, learn: false, guide: null };
 
 // Turns an address like /discover/cvv or /tools/verify into { network, tool, testingTool, valid }
 export function parseUrl(url: string): ParsedUrl {
@@ -107,14 +112,20 @@ export function parseUrl(url: string): ParsedUrl {
 
   if (networkPart === 'tools') {
     const testingTool = segments.length === 2 ? findTestingTool(toolPart) : null;
-    return { network: null, tool: null, testingTool: testingTool?.slug ?? null, valid: !!testingTool };
+    return { ...NOWHERE, testingTool: testingTool?.slug ?? null, valid: !!testingTool };
+  }
+
+  if (networkPart === 'learn') {
+    const guide = toolPart ? findGuide(toolPart) : null;
+    const valid = segments.length === 1 || (segments.length === 2 && !!guide);
+    return valid ? { ...NOWHERE, learn: true, guide: guide?.slug ?? null, valid } : { ...NOWHERE, valid };
   }
 
   const network = NETWORKS.includes(networkPart as Exclude<Network, null>) ? (networkPart as Network) : null;
   const tool = network && NETWORK_CONFIG[network].tools.some(t => t.slug === toolPart) ? toolPart : null;
   const valid = segments.length <= 2 && (!networkPart || !!network) && (!toolPart || !!tool);
 
-  return valid ? { network, tool, testingTool: null, valid } : { network: null, tool: null, testingTool: null, valid };
+  return valid ? { ...NOWHERE, network, tool, valid } : { ...NOWHERE, valid };
 }
 
 
@@ -128,9 +139,10 @@ export interface NavLink {
 
 const TOOLS_URL = '/tools';
 
-/** Header: the four networks and the testing tools; the section of the current page is active. */
-export function headerLinks(route: ParsedUrl): { networks: NavLink[]; tools: NavLink[] } {
+/** Header: the four networks, the testing tools and Learn; the section of the current page is active. */
+export function headerLinks(route: ParsedUrl): { networks: NavLink[]; tools: NavLink[]; learn: NavLink } {
   return {
+    learn: { label: 'Learn', url: LEARN_URL, active: route.learn, title: 'Short guides: cryptograms, ARQC / ARPC, EMV tags' },
     networks: NETWORKS.map(n => ({
       label: NETWORK_CONFIG[n].shortLabel, url: `/${n}`, active: route.network === n,
       title: `${NETWORK_CONFIG[n].label} (${NETWORK_CONFIG[n].platform})`
@@ -144,6 +156,11 @@ export function headerLinks(route: ParsedUrl): { networks: NavLink[]; tools: Nav
 /** Home > Visa > ARQC, or Home > Verify a Value. Empty on the start page. */
 export function breadcrumb(route: ParsedUrl): NavLink[] {
   const home: NavLink = { label: 'Home', url: '/', active: false };
+  if (route.learn) {
+    const guide = findGuide(route.guide);
+    const learn: NavLink = { label: 'Learn', url: LEARN_URL, active: !guide };
+    return guide ? [home, learn, { label: guide.title, url: `${LEARN_URL}/${guide.slug}`, active: true }] : [home, learn];
+  }
   if (route.testingTool) {
     const tool = findTestingTool(route.testingTool)!;
     return [home, { label: tool.label, url: `${TOOLS_URL}/${tool.slug}`, active: true, title: tool.description }];
@@ -160,6 +177,10 @@ export function breadcrumb(route: ParsedUrl): NavLink[] {
 
 /** The other values of the same network (or the other testing tools): one click to switch. */
 export function valueSwitcher(route: ParsedUrl): NavLink[] {
+  if (route.learn) {
+    return route.guide ? GUIDES.map(g => ({ label: g.title, url: `${LEARN_URL}/${g.slug}`, active: g.slug === route.guide,
+                                            title: g.summary })) : [];
+  }
   if (route.testingTool) {
     return TESTING_TOOLS.map(t => ({ label: t.label, url: `${TOOLS_URL}/${t.slug}`, active: t.slug === route.testingTool,
                                      title: t.description }));
@@ -175,6 +196,9 @@ export function valueSwitcher(route: ParsedUrl): NavLink[] {
 /** Browser tab title, e.g. "Visa ARQC · Cryptogram Generator": tabs and history stay recognisable. */
 export function pageTitle(route: ParsedUrl): string {
   const app = 'Cryptogram Generator';
+  if (route.learn) {
+    return `${findGuide(route.guide)?.title ?? 'Learn'} · ${app}`;
+  }
   if (route.testingTool) {
     return `${findTestingTool(route.testingTool)!.label} · ${app}`;
   }

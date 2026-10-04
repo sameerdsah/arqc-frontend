@@ -168,7 +168,7 @@ describe('App', () => {
     for (const url of ['/', '/visa', '/visa/arqc', '/tools/verify']) {
       await go(url);
       const labels = Array.from(el.querySelectorAll('app-header .links a')).map(a => a.textContent?.trim());
-      expect(labels).toEqual(['Discover', 'Mastercard', 'Visa', 'Amex', 'Verify', 'Batch']);
+      expect(labels).toEqual(['Discover', 'Mastercard', 'Visa', 'Amex', 'Verify', 'Batch', 'Learn']);
       expect(el.querySelector('app-header .brand')?.getAttribute('href')).toBe('/');
     }
     expect(el.querySelector('app-header .links a.active')?.textContent?.trim()).toBe('Verify');
@@ -219,5 +219,34 @@ describe('App', () => {
 
     await go('/tools/unknown');
     expect(router.url).toBe('/');
+  });
+
+  it('shows recent checks on the start page only', async () => {
+    expect(el.querySelector('app-recent-checks-panel')).toBeTruthy();
+    await go('/visa/arqc');
+    expect(el.querySelector('app-recent-checks-panel')).toBeNull();
+  });
+
+  it('opens Learn and its guides by address, with a breadcrumb', async () => {
+    await go('/learn');
+    expect(el.querySelector('app-learn-page .index')).toBeTruthy();
+    expect(el.querySelector('.selector-container h1')).toBeNull();     // not the start page
+    expect(el.querySelector('app-header .links a.active')?.textContent?.trim()).toBe('Learn');
+
+    await go('/learn/arqc-arpc-round-trip');
+    expect(el.querySelector('app-learn-page h1')?.textContent).toBe('ARQC and ARPC: the round trip');
+    expect(Array.from(el.querySelectorAll('app-page-nav .crumbs li')).map(li => li.textContent?.trim()))
+      .toEqual(['Home', 'Learn', 'ARQC and ARPC: the round trip']);
+    expect(TestBed.inject(Title).getTitle()).toBe('ARQC and ARPC: the round trip · Cryptogram Generator');
+
+    await go('/learn/unknown');
+    expect(router.url).toBe('/');
+  });
+
+  it('shows the footer on every page', async () => {
+    for (const url of ['/', '/visa/arqc', '/learn']) {
+      await go(url);
+      expect(el.querySelector('app-footer .status')).toBeTruthy();
+    }
   });
 });

@@ -1,18 +1,26 @@
-<app-header [networks]="header().networks" [tools]="header().tools" [homeActive]="isHome()"></app-header>
+<a class="skip-link" href="#main">Skip to content</a>
+<app-header [networks]="header().networks" [tools]="header().tools" [learn]="header().learn" [homeActive]="isHome()"></app-header>
 
-<main class="page">
+<main class="page" id="main">
 
   @if (crumbs().length) {
     <app-page-nav [crumbs]="crumbs()" [switcher]="switcher()"></app-page-nav>
   }
 
-  <div class="selector-container" *ngIf="!selectedNetwork && !selectedTestingTool">
+  <div class="selector-container" *ngIf="isHome()">
     <h1>Select Card Network</h1>
     <div class="network-options">
       <button class="network-btn" *ngFor="let network of networks" (click)="selectNetwork(network)">{{ networkConfig[network].label }}</button>
     </div>
     <app-testing-tools-menu></app-testing-tools-menu>
+    <app-recent-checks-panel></app-recent-checks-panel>
   </div>
+
+  @if (learn()) {
+    <div class="learn-wrapper">
+      <app-learn-page [slug]="guide()"></app-learn-page>
+    </div>
+  }
 
   <div class="selector-container" *ngIf="selectedNetwork && !selectedTool">
     <h2>{{ selectedNetworkConfig?.label }}</h2>
@@ -33,3 +41,5 @@
   </div>
 
 </main>
+
+<app-footer></app-footer>

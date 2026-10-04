@@ -1,12 +1,14 @@
-import { Component, computed, inject, Injector, input, model, output, signal } from '@angular/core';
+import { Component, computed, effect, inject, Injector, input, model, output, signal, untracked } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { catchError, distinctUntilChanged, map, Observable, of, startWith, switchMap } from 'rxjs';
 import { OperationsService } from '../../core/operations/operations.service';
 import { Calculation, DiagnosisFinding, Explanation } from '../../core/operations/operations.models';
 import {
-  changesOf, checkReport, IDLE, isApplied, LOADING, normaliseReceived, resultFormat
+  changesOf, checkReport, findingOf, IDLE, isApplied, LOADING, normaliseReceived, resultFormat
 } from '../../core/operations/value-check';
+import { RecentChecks } from '../../core/recent/recent-checks.service';
+import { relativeLink } from '../../core/recent/recent-checks';
 import { CheckOutcome } from '../check-outcome/check-outcome';
 import { buildCheckLink } from '../../core/operations/check-link';
 
@@ -38,6 +40,7 @@ const sameRequest = (a: ExplainRequest | null, b: ExplainRequest | null) => JSON
 export class ReceivedValueCheck {
   private readonly api = inject(OperationsService);
   private readonly injector = inject(Injector);
+  private readonly recent = inject(RecentChecks);
 
   /** The page's endpoint, e.g. '/api/visa/arqc': the operation is found in the catalogue by it. */
   readonly path = input.required<string>();
@@ -101,6 +104,27 @@ export class ReceivedValueCheck {
                                      expected: c.expected, received: c.received, explanation: this.explanation(),
                                      link: this.link() }) : '';
   });
+
+  constructor() {
+    // v2: every finished check goes to "Recent checks" on the home page (this browser only).
+    // A mismatch is recorded again when its cause arrives; the same link replaces the earlier entry.
+    effect(() => {
+      const c = this.compared();
+      const link = this.link();
+      const explanation = this.explanation();
+      if (!c || !link || explanation.status === 'loading') {
+        return;
+      }
+      const relative = relativeLink(link);
+      const match = c.expected === c.received;
+      const cause = match ? undefined : findingOf(explanation)?.title;
+      untracked(() => this.recent.record({
+        path: relative.split('?')[0], valueName: this.valueName(), received: c.received,
+        outcome: match ? 'match' : 'mismatch', ...(cause ? { cause } : {}), link: relative,
+        at: new Date().toISOString()
+      }));
+    });
+  }
 
   open() {
     this.opened.set(true);

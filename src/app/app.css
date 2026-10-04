@@ -1,61 +1,78 @@
+/* v2 shell: header, page on the light ground, footer */
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 .page {
-  min-height: calc(100vh - 56px);   /* below the header */
+  flex: 1;
   width: 100%;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 22px 20px 40px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  padding: 24px 24px 48px;
+  font-family: var(--font-sans);
 }
 
+/* Network page (/visa): the values as cards */
 .selector-container {
   width: 100%;
-  max-width: 420px;
+  max-width: 560px;
   text-align: center;
-  background: #f8f9fa;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-  padding: 30px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 28px;
   box-sizing: border-box;
 }
 
 .selector-container h1,
 .selector-container h2 {
-  color: #333;
-  margin-bottom: 25px;
+  color: var(--navy);
+  margin: 0 0 18px;
+  letter-spacing: -0.01em;
 }
 
 .network-options {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
 .network-btn {
-  padding: 14px;
-  font-size: 16px;
-  background: #1976d2;
+  min-height: 48px;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: 500;
+  background: var(--primary);
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
 }
 
 .network-btn:hover:not(:disabled) {
-  background: #0d5bbc;
+  background: var(--primary-dark);
+}
+
+.network-btn:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
 }
 
 .maintenance-text {
-  color: #b00020;
+  color: var(--bad);
   font-weight: bold;
   font-size: 18px;
   margin-bottom: 20px;
 }
 
+/* A value page: the form on a white card */
 .arqc-wrapper {
   width: 100%;
-  max-width: 480px;
+  max-width: 520px;
   box-sizing: border-box;
   text-align: center;
 }
@@ -65,9 +82,38 @@
   max-width: 920px;
 }
 
+/* Learn pages: reading width */
+.learn-wrapper {
+  width: 100%;
+  max-width: 760px;
+}
+
 .network-platform {
   text-align: center;
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.9rem;
   margin: -8px 0 20px;
 }
+
+/* Phone */
+@media (max-width: 600px) {
+  .page { padding: 16px 16px 32px; }
+  .selector-container { padding: 20px 16px; }
+  .network-options { grid-template-columns: 1fr; }
+  .network-btn { min-height: 48px; }
+}
+
+/* Keyboard users can jump past the header */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 20;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: var(--amber);
+  color: var(--navy);
+  font-weight: 600;
+  text-decoration: none;
+}
+.skip-link:focus { top: 8px; }

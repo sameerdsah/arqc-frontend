@@ -1,0 +1,70 @@
+@if (guide(); as g) {
+  <article class="guide">
+    <p class="eyebrow">{{ g.kind }} · {{ g.minutes }} min read</p>
+    <h1>{{ g.title }}</h1>
+    <p class="lead">{{ g.summary }}</p>
+
+    @for (section of g.sections; track section.heading) {
+      <section>
+        <h2>{{ section.heading }}</h2>
+        @for (p of section.paragraphs; track $index) {
+          <p>{{ p }}</p>
+        }
+        @if (section.points?.length) {
+          <ul>
+            @for (point of section.points; track $index) {
+              <li>{{ point }}</li>
+            }
+          </ul>
+        }
+      </section>
+    }
+
+    @if (g.tags?.length) {
+      <div class="table-wrap">
+        <table>
+          <caption>EMV tags used by this app</caption>
+          <thead><tr><th scope="col">Tag</th><th scope="col">Name</th><th scope="col">Holds</th><th scope="col">Used by</th></tr></thead>
+          <tbody>
+            @for (row of g.tags; track row.tag) {
+              <tr><th scope="row" class="mono">{{ row.tag }}</th><td>{{ row.name }}</td><td>{{ row.holds }}</td><td>{{ row.usedBy }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <aside class="try" aria-label="Try it">
+      <h2>Try it</h2>
+      <div class="actions">
+        @for (link of g.tryIt; track link.url) {
+          <a class="button" [routerLink]="path(link.url)" [queryParams]="query(link.url)">{{ link.label }}</a>
+        }
+      </div>
+    </aside>
+
+    <nav class="more" aria-label="More guides">
+      <a [routerLink]="learnUrl">All guides</a>
+      @if (next(); as n) {
+        <a class="next" [routerLink]="[learnUrl, n.slug]">Next: {{ n.title }} <span aria-hidden="true">→</span></a>
+      }
+    </nav>
+  </article>
+} @else {
+  <section class="index">
+    <p class="eyebrow">Learn</p>
+    <h1>The essentials, in a few minutes</h1>
+    <p class="lead">Short guides for testers and developers who are new to EMV values. Each one ends in the app, so you can try it straight away.</p>
+    <ul class="cards">
+      @for (g of guides; track g.slug) {
+        <li>
+          <a class="card" [routerLink]="[learnUrl, g.slug]">
+            <span class="eyebrow">{{ g.kind === 'Reference' ? 'Reference' : g.minutes + ' min read' }}</span>
+            <span class="title">{{ g.title }}</span>
+            <span class="summary">{{ g.summary }}</span>
+          </a>
+        </li>
+      }
+    </ul>
+  </section>
+}

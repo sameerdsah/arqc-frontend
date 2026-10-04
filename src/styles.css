@@ -1,4 +1,33 @@
-/* You can add global styles to this file, and also import other style files */
+/* Cryptogram Generator v2 - design tokens and global styles.
+   IBM Plex Sans / Mono are bundled with the app (no font CDN): the strict Content-Security-Policy
+   (font-src 'self') stays as it is, and the desktop app works offline. */
+:root {
+  --navy: #062752;
+  --primary: #1557b0;
+  --primary-dark: #0f4590;
+  --primary-soft: #e6eefa;
+  --amber: #f5a623;
+  --amber-soft: #fdf1dc;
+  --amber-ink: #7a4a00;
+  --ground: #f4f6fa;
+  --surface: #ffffff;
+  --border: #dce3ec;
+  --border-strong: #b9c4d3;
+  --text: #1b2738;
+  --text-muted: #52607a;
+  --ok: #17803d;
+  --ok-soft: #dcf3e4;
+  --bad: #c0262d;
+  --bad-soft: #fbe2e3;
+  --shadow: 0 4px 16px rgba(6, 39, 82, 0.08);
+  --discover: #d9661b;
+  --mastercard: #b0303a;
+  --visa: #1a3d8f;
+  --amex: #2e77bc;
+  --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -12,14 +41,27 @@ body::-webkit-scrollbar {
   display: none;
 }
 
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* The value pages use the same fonts as the rest of v2 */
+input, select, textarea, button {
+  font-family: inherit;
+}
+
 .subtitle {
   text-align: center;
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.9rem;
   margin: -10px 0 16px;
 }
-/* The header runs edge to edge */
-body {
-  margin: 0;
-  background: #fff;
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
 }

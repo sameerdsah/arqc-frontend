@@ -38,6 +38,9 @@ import { MastercardAacGenerator, MastercardTcGenerator } from './mastercard/tc-a
 import { AppHeader } from './shared/app-header/app-header';
 import { PageNav } from './shared/page-nav/page-nav';
 import { TestingToolsMenu } from './tools/testing-tools-menu/testing-tools-menu';
+import { AppFooter } from './shared/app-footer/app-footer';
+import { LearnPage } from './learn/learn-page/learn-page';
+import { RecentChecksPanel } from './shared/recent-checks-panel/recent-checks-panel';
 import { findTestingTool } from './tools/testing-tools';
 import {
   breadcrumb, headerLinks, Network, NETWORK_CONFIG, NetworkConfig, NETWORKS, pageTitle, parseUrl, Tool, ToolOption,
@@ -85,7 +88,7 @@ const PAGE_COMPONENTS: Record<string, Type<unknown>> = {
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, NgComponentOutlet, AppHeader, PageNav, TestingToolsMenu],
+  imports: [CommonModule, NgComponentOutlet, AppHeader, PageNav, TestingToolsMenu, AppFooter, LearnPage, RecentChecksPanel],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
@@ -112,7 +115,9 @@ export class App {
   readonly header = computed(() => headerLinks(this.route()));
   readonly crumbs = computed(() => breadcrumb(this.route()));
   readonly switcher = computed(() => valueSwitcher(this.route()));
-  readonly isHome = computed(() => !this.route().network && !this.route().testingTool);
+  readonly isHome = computed(() => !this.route().network && !this.route().testingTool && !this.route().learn);
+  readonly learn = computed(() => this.route().learn);
+  readonly guide = computed(() => this.route().guide);
 
   // The page shown is always worked out from the address bar
   get selectedNetwork(): Network {
