@@ -25,9 +25,10 @@ export interface NetworkConfig {
   tools: ToolOption[];
 }
 
-// Each network lists the same six kinds of value, in the same order, using that
-// network's own names: chip cryptogram, issuer response, stripe value,
-// printed value, chip value (service code 999) and contactless dynamic value.
+// Each network lists the same kinds of value, in the same order, using that
+// network's own names: chip cryptogram, issuer response, the card's final
+// cryptograms TC and AAC, stripe value, printed value, chip value (service code 999)
+// and contactless dynamic value. American Express gets TC and AAC with its ARQC.
 export const NETWORK_CONFIG: Record<Exclude<Network, null>, NetworkConfig> = {
   discover: {
     label: 'Discover',
@@ -36,6 +37,8 @@ export const NETWORK_CONFIG: Record<Exclude<Network, null>, NetworkConfig> = {
     tools: [
       { slug: 'arqc', label: 'ARQC', name: 'Authorization Request Cryptogram (9F26)' },
       { slug: 'arpc', label: 'ARPC', name: 'Authorization Response Cryptogram' },
+      { slug: 'tc', label: 'TC', name: 'Transaction Certificate: the card approved (9F27 = 40)' },
+      { slug: 'aac', label: 'AAC', name: 'Application Authentication Cryptogram: the card declined (9F27 = 00)' },
       { slug: 'cvv', label: 'CVV', name: 'Card Verification Value (magnetic stripe)' },
       { slug: 'cid', label: 'CID', name: 'Card Identification Number (printed on the card)' },
       { slug: 'icvv', label: 'iCVV', name: 'Integrated Card Verification Value (stored in the chip)' },
@@ -49,6 +52,8 @@ export const NETWORK_CONFIG: Record<Exclude<Network, null>, NetworkConfig> = {
     tools: [
       { slug: 'arqc', label: 'ARQC', name: 'Authorization Request Cryptogram (9F26)' },
       { slug: 'arpc', label: 'ARPC', name: 'Authorization Response Cryptogram' },
+      { slug: 'tc', label: 'TC', name: 'Transaction Certificate: the card approved (9F27 = 40)' },
+      { slug: 'aac', label: 'AAC', name: 'Application Authentication Cryptogram: the card declined (9F27 = 00)' },
       { slug: 'cvc1', label: 'CVC1', name: 'Card Validation Code 1 (magnetic stripe)' },
       { slug: 'cvc2', label: 'CVC2', name: 'Card Validation Code 2 (printed on the card)' },
       { slug: 'chip-cvc', label: 'Chip CVC', name: 'Chip Card Validation Code (stored in the chip)' },
@@ -62,6 +67,8 @@ export const NETWORK_CONFIG: Record<Exclude<Network, null>, NetworkConfig> = {
     tools: [
       { slug: 'arqc', label: 'ARQC', name: 'Authorization Request Cryptogram (9F26)' },
       { slug: 'arpc', label: 'ARPC', name: 'Authorization Response Cryptogram' },
+      { slug: 'tc', label: 'TC', name: 'Transaction Certificate: the card approved (9F27 = 40)' },
+      { slug: 'aac', label: 'AAC', name: 'Application Authentication Cryptogram: the card declined (9F27 = 00)' },
       { slug: 'cvv', label: 'CVV', name: 'Card Verification Value (magnetic stripe)' },
       { slug: 'cvv2', label: 'CVV2', name: 'Card Verification Value 2 (printed on the card)' },
       { slug: 'icvv', label: 'iCVV', name: 'Integrated Card Verification Value (stored in the chip)' },

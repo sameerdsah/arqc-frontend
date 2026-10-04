@@ -7,9 +7,9 @@ import { App } from './app';
 
 // Expected buttons on each network page (same order as NETWORK_CONFIG in app.ts)
 const EXPECTED: Record<string, { heading: string; buttons: string[] }> = {
-  discover: { heading: 'Discover', buttons: ['ARQC', 'ARPC', 'CVV', 'CID', 'iCVV', 'DCVV'] },
-  mastercard: { heading: 'Mastercard', buttons: ['ARQC', 'ARPC', 'CVC1', 'CVC2', 'Chip CVC', 'CVC3'] },
-  visa: { heading: 'Visa', buttons: ['ARQC', 'ARPC', 'CVV', 'CVV2', 'iCVV', 'dCVV'] },
+  discover: { heading: 'Discover', buttons: ['ARQC', 'ARPC', 'TC', 'AAC', 'CVV', 'CID', 'iCVV', 'DCVV'] },
+  mastercard: { heading: 'Mastercard', buttons: ['ARQC', 'ARPC', 'TC', 'AAC', 'CVC1', 'CVC2', 'Chip CVC', 'CVC3'] },
+  visa: { heading: 'Visa', buttons: ['ARQC', 'ARPC', 'TC', 'AAC', 'CVV', 'CVV2', 'iCVV', 'dCVV'] },
   amex: { heading: 'American Express', buttons: ['ARQC', 'ARPC', 'CSC', 'CID', 'Chip CSC', 'Dynamic CSC'] }
 };
 
@@ -98,6 +98,12 @@ describe('App', () => {
   const NETWORK_PAGES: [string, string, string, boolean][] = [
     ['/visa/arqc', 'app-visa-arqc-generator', 'ARQC Generator', true],
     ['/visa/arpc', 'app-visa-arpc-generator', 'ARPC Generator', true],
+    ['/visa/tc', 'app-visa-tc-generator', 'TC Generator', true],
+    ['/visa/aac', 'app-visa-aac-generator', 'AAC Generator', true],
+    ['/discover/tc', 'app-discover-tc-generator', 'TC Generator', true],
+    ['/discover/aac', 'app-discover-aac-generator', 'AAC Generator', true],
+    ['/mastercard/tc', 'app-mastercard-tc-generator', 'TC Generator', true],
+    ['/mastercard/aac', 'app-mastercard-aac-generator', 'AAC Generator', true],
     ['/visa/cvv', 'app-visa-cvv-generator', 'CVV Generator', true],
     ['/visa/cvv2', 'app-visa-cvv2-generator', 'CVV2 Generator', true],
     ['/visa/icvv', 'app-visa-icvv-generator', 'iCVV Generator', true],

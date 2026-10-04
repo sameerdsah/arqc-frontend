@@ -59,7 +59,7 @@ describe('EmvArqcForm', () => {
   }
 
   it('shows all 11 EMV fields: transaction data first, then terminal and card data', () => {
-    const labels = Array.from(fixture.nativeElement.querySelectorAll('label')).map((l: any) => l.textContent.trim());
+    const labels = Array.from(fixture.nativeElement.querySelectorAll('.form-group label')).map((l: any) => l.textContent.trim());
     expect(labels.length).toBe(11);
     expect(labels.slice(0, 4).map(l => l.split(' ')[1])).toEqual(['9F02', '9F37', '9F36', '9F10']);
     expect(labels[4]).toContain('9F03');
@@ -174,5 +174,28 @@ describe('EmvArqcForm', () => {
     fixture.detectChanges();
     expect(component.received).toBe('949BBD6013450C7D');
     expect(component.arqcRequest['arqc']).toBeUndefined();
+  });
+
+  it('a TC page posts the same data to its own address and shows 9F27', async () => {
+    fixture.componentRef.setInput('config', { ...CONFIG, title: 'TC Generator', apiUrl: '/api/visa/tc', cryptogramType: 'TC' });
+    fixture.detectChanges();
+    expect(component.cryptogramType).toBe('TC');
+    await fillAndSubmit(VALID_ARQC_INPUT);
+    const req = httpMock.expectOne('/api/visa/tc');
+    expect(Object.keys(req.request.body).length).toBe(11);
+    req.flush({ result: '949BBD6013450C7D', type: 'TC', cid: '40', cvn: '0A' });
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('The computed TC is:');
+    expect(fixture.nativeElement.querySelector('.cid-line')?.textContent).toContain('40');
+  });
+
+  it('points to the right page when pasted chip data holds another cryptogram (9F27)', () => {
+    component.applyChipData({ tag_9f36: '0002', arqc: '1122334455667788', cid: '40' });
+    (component as any).cdr.detectChanges();     // called directly here; in the app the (filled) event refreshes the view
+    expect(component.otherTypeHint?.type).toBe('TC');
+    expect(fixture.nativeElement.querySelector('.type-hint')?.textContent).toContain('holds a TC');
+    expect(component.arqcRequest['cid']).toBeUndefined();
+    component.applyChipData({ tag_9f36: '0003', cid: '80' });         // an ARQC on the ARQC page: no hint
+    expect(component.otherTypeHint).toBeNull();
   });
 });

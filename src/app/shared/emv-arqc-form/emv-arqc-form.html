@@ -4,6 +4,11 @@
 
   <app-chip-data-paste [targets]="chipTargets" [example]="exampleChipData" (filled)="applyChipData($event)"></app-chip-data-paste>
 
+  <p class="type-hint" *ngIf="otherTypeHint as hint" role="status">
+    This chip data holds a <strong>{{ hint.type }}</strong> (tag 9F27), not a {{ cryptogramType }}.
+    <a [href]="hint.path">Open the {{ hint.type }} page</a> to check it there.
+  </p>
+
   <form #arqcForm="ngForm" (ngSubmit)="submitForm(arqcForm)">
 
     <app-example-values-link (use)="useExampleValues()"></app-example-values-link>
@@ -22,6 +27,7 @@
     </div>
     </ng-container>
 
+
     <button
       type="submit"
       [disabled]="isSubmitting"
@@ -34,15 +40,18 @@
 
   <div class="response" *ngIf="response || isError">
     <p *ngIf="!isError && response?.result">
-      The computed ARQC is: <strong class="crypto-value">{{ response.result }}</strong>
+      The computed {{ response?.type || cryptogramType }} is: <strong class="crypto-value">{{ response.result }}</strong>
+    </p>
+    <p *ngIf="!isError && response?.result && response?.cid" class="cid-line">
+      Tag 9F27 (Cryptogram Information Data) = <code>{{ response.cid }}</code> · {{ typeInfo.meaning }}
     </p>
     <p *ngIf="isError" class="response-error">
-      <strong>Unable to calculate the ARQC</strong><br>
+      <strong>Unable to calculate the {{ cryptogramType }}</strong><br>
       <small>{{ error_response }}</small>
     </p>
   </div>
 
-  <app-received-check [path]="config.apiUrl" valueName="ARQC" [calculation]="calculation"
+  <app-received-check [path]="config.apiUrl" [valueName]="cryptogramType" [calculation]="calculation"
                       [(received)]="received" (apply)="applyChanges($event)"></app-received-check>
 
 </div>

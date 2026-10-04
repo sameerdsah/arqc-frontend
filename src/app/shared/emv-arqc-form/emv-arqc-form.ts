@@ -10,6 +10,7 @@ import { ExampleValuesLink } from '../example-values-link/example-values-link';
 import { ReceivedValueCheck } from '../received-check/received-check';
 import { Calculation } from '../../core/operations/operations.models';
 import { currentSearch, readCheckLink } from '../../core/operations/check-link';
+import { CryptogramType, cryptogramTypeInfo, siblingPagePath, typeFromCid } from '../../core/emv/cryptogram-type';
 
 /** Settings for one network's ARQC page: Discover, Visa or Mastercard. */
 export interface EmvArqcConfig {
@@ -18,6 +19,7 @@ export interface EmvArqcConfig {
   apiUrl: string;      // backend endpoint, e.g. '/api/visa/arqc'
   fields: EmvField[];  // the EMV tags this network's ARQC uses, in screen order
   exampleResult?: string;  // ARQC of the example values: the example chip data then carries it in 9F26
+  cryptogramType?: CryptogramType;   // the page's cryptogram - ARQC (default), TC or AAC; same calculation
 }
 
 /** What differs between Visa and Mastercard in the full EMV data set. */
@@ -85,6 +87,11 @@ export class EmvArqcForm implements OnChanges {
   received = '';
   calculation: Calculation | null = null;
 
+  /** This page's cryptogram - ARQC (go online), TC (approved) or AAC (declined). */
+  cryptogramType: CryptogramType = 'ARQC';
+  /** Set when pasted chip data holds another cryptogram (9F27): the page to open instead. */
+  otherTypeHint: { type: CryptogramType; path: string } | null = null;
+
   response: any = null;
   isSubmitting = false;
   isError = false;
@@ -95,12 +102,14 @@ export class EmvArqcForm implements OnChanges {
   ngOnChanges() {
     this.fields = this.config.fields;
     this.fieldKeys = this.fields.map(f => f.key);
-    this.chipTargets = [...this.fieldKeys, 'arqc'];
+    this.cryptogramType = this.config.cryptogramType ?? 'ARQC';
+    this.chipTargets = [...this.fieldKeys, 'arqc', 'cid'];
     const cryptogram: [string, string][] = this.config.exampleResult ? [['9F26', this.config.exampleResult]] : [];
     this.exampleChipData = exampleChipDataFor(this.fields.map(f => ({ name: f.key, example: f.example })),
-                                              [...cryptogram, ['9F27', '80']]);
+                                              [...cryptogram, ['9F27', cryptogramTypeInfo(this.cryptogramType).cid]]);
     this.arqcRequest = Object.fromEntries(this.fields.map(f => [f.key, '']));
     this.received = '';
+    this.otherTypeHint = null;
     this.clearResult();
     this.openCheckLink();
   }
@@ -123,11 +132,15 @@ export class EmvArqcForm implements OnChanges {
 
   /** Values read from pasted chip data (field 55) replace the matching fields. */
   applyChipData(values: Record<string, string>) {
-    const { arqc, ...fields } = values;
+    const { arqc, cid, ...fields } = values;
     this.arqcRequest = { ...this.arqcRequest, ...fields };
     if (arqc) {
-      this.received = arqc;   // the card's own ARQC: Submit then checks it
+      this.received = arqc;   // the card's own cryptogram: Submit then checks it
     }
+    // 9F27 says which cryptogram the card returned; another one has its own page
+    const type = typeFromCid(cid);
+    this.otherTypeHint = type && type !== this.cryptogramType && typeof location !== 'undefined'
+      ? { type, path: siblingPagePath(location.pathname, type) } : null;
     this.clearResult();
   }
 
@@ -136,6 +149,10 @@ export class EmvArqcForm implements OnChanges {
     const known = Object.entries(changes).filter(([key]) => this.fieldKeys.includes(key));
     this.arqcRequest = { ...this.arqcRequest, ...Object.fromEntries(known) };
     this.calculate();
+  }
+
+  get typeInfo() {
+    return cryptogramTypeInfo(this.cryptogramType);
   }
 
   private clearResult() {

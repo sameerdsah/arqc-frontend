@@ -32,6 +32,9 @@ import { AmexCscGenerator } from './amex/csc-generator/csc-generator';
 import { AmexCidGenerator } from './amex/cid-generator/cid-generator';
 import { AmexChipCscGenerator } from './amex/chip-csc-generator/chip-csc-generator';
 import { AmexDynamicCscGenerator } from './amex/dynamic-csc-generator/dynamic-csc-generator';
+import { DiscoverAacGenerator, DiscoverTcGenerator } from './discover/tc-aac-generators/tc-aac-generators';
+import { VisaAacGenerator, VisaTcGenerator } from './visa/tc-aac-generators/tc-aac-generators';
+import { MastercardAacGenerator, MastercardTcGenerator } from './mastercard/tc-aac-generators/tc-aac-generators';
 import { AppHeader } from './shared/app-header/app-header';
 import { PageNav } from './shared/page-nav/page-nav';
 import { TestingToolsMenu } from './tools/testing-tools-menu/testing-tools-menu';
@@ -47,6 +50,8 @@ import {
 const PAGE_COMPONENTS: Record<string, Type<unknown>> = {
   'discover/arqc': ArqcGenerator,
   'discover/arpc': ArpcGenerator,
+  'discover/tc': DiscoverTcGenerator,
+  'discover/aac': DiscoverAacGenerator,
   'discover/cvv': CvvGenerator,
   'discover/cid': CidGenerator,
   'discover/icvv': IcvvGenerator,
@@ -54,6 +59,8 @@ const PAGE_COMPONENTS: Record<string, Type<unknown>> = {
 
   'mastercard/arqc': MastercardArqcGenerator,
   'mastercard/arpc': MastercardArpcGenerator,
+  'mastercard/tc': MastercardTcGenerator,
+  'mastercard/aac': MastercardAacGenerator,
   'mastercard/cvc1': MastercardCvc1Generator,
   'mastercard/cvc2': MastercardCvc2Generator,
   'mastercard/chip-cvc': MastercardChipCvcGenerator,
@@ -61,6 +68,8 @@ const PAGE_COMPONENTS: Record<string, Type<unknown>> = {
 
   'visa/arqc': VisaArqcGenerator,
   'visa/arpc': VisaArpcGenerator,
+  'visa/tc': VisaTcGenerator,
+  'visa/aac': VisaAacGenerator,
   'visa/cvv': VisaCvvGenerator,
   'visa/cvv2': VisaCvv2Generator,
   'visa/icvv': VisaIcvvGenerator,

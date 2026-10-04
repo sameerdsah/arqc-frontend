@@ -126,7 +126,7 @@ export interface ChipValues {
 
 /**
  * Turns parsed tags into API field values:
- *   direct tags (9F02, 9F37, 9F10, 8A ...), 9F26 -> arqc, 5A -> pan,
+ *   direct tags (9F02, 9F37, 9F10, 8A ...), 9F26 -> arqc, 9F27 -> cid, 5A -> pan,
  *   5F24 (YYMMDD) -> expiry (YYMM), 5F30 -> service_code,
  *   57 (track 2 equivalent) -> pan, expiry and service code,
  *   91 (issuer authentication data) -> arpc (its first 8 bytes).
@@ -149,6 +149,9 @@ export function chipValues(tags: Map<string, string>): ChipValues {
   }
   if (tags.has('9F26')) {
     set('arqc', tags.get('9F26')!, '9F26');
+  }
+  if (tags.has('9F27')) {
+    set('cid', tags.get('9F27')!, '9F27');   // cryptogram type (80 ARQC, 40 TC, 00 AAC)
   }
   if (tags.has('91') && tags.get('91')!.length >= 16) {
     set('arpc', tags.get('91')!.slice(0, 16), '91');
@@ -177,7 +180,7 @@ export function tagForField(field: string): string | null {
   if (direct) {
     return direct[0];
   }
-  return ({ arqc: '9F26', pan: '5A', expiry: '5F24', service_code: '5F30' } as Record<string, string>)[field] ?? null;
+  return ({ arqc: '9F26', cid: '9F27', pan: '5A', expiry: '5F24', service_code: '5F30' } as Record<string, string>)[field] ?? null;
 }
 
 /** Encodes one API field value as the chip would carry it (expiry YYMM -> YYMMDD, service code -> 2 bytes). */

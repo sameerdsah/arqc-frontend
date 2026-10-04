@@ -30,7 +30,7 @@ describe('navigation (site map)', () => {
     expect(valueSwitcher(parseUrl('/'))).toEqual([]);
     expect(valueSwitcher(parseUrl('/visa'))).toEqual([]);
     const visa = valueSwitcher(parseUrl('/visa/arqc'));
-    expect(visa.map(l => l.label)).toEqual(['ARQC', 'ARPC', 'CVV', 'CVV2', 'iCVV', 'dCVV']);
+    expect(visa.map(l => l.label)).toEqual(['ARQC', 'ARPC', 'TC', 'AAC', 'CVV', 'CVV2', 'iCVV', 'dCVV']);
     expect(visa.filter(l => l.active).map(l => l.url)).toEqual(['/visa/arqc']);
     expect(valueSwitcher(parseUrl('/tools/verify')).map(l => l.label)).toEqual(['Verify a Value', 'Batch Generation']);
   });

@@ -36,7 +36,7 @@ describe('EMV TLV parser', () => {
     expect(message('9F02')).toContain('no length');
   });
 
-  it('maps tags to API fields: direct tags, 9F26 -> arqc, 91 -> arpc', () => {
+  it('maps tags to API fields: direct tags, 9F26 -> arqc, 9F27 -> cid, 91 -> arpc', () => {
     const { fields, usedTags } = chipValues(flattenTlv(parseTlv(VISA_FIELD_55 + buildTlv([['8A', '3030'], ['91', 'C837D13061C1E8963030']]))));
     expect(fields['tag_9f02']).toBe('000000010000');
     expect(fields['tag_9f10']).toBe('06010A03A00000');
@@ -44,7 +44,8 @@ describe('EMV TLV parser', () => {
     expect(fields['arqc']).toBe('949BBD6013450C7D');
     expect(fields['tag_8a']).toBe('3030');
     expect(fields['arpc']).toBe('C837D13061C1E896');
-    expect(usedTags.has('9F27')).toBe(false);
+    expect(fields['cid']).toBe('80');                // the cryptogram type (9F27)
+    expect(usedTags.has('9F27')).toBe(true);
   });
 
   it('reads card data from 5A / 5F24 / 5F30 or from track 2 equivalent data (57)', () => {

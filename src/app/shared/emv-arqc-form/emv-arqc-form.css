@@ -134,3 +134,11 @@ label,
 .section-head .link-btn:hover {
   text-decoration: underline;
 }
+
+/* The answer's 9F27, and a pointer when pasted chip data holds another cryptogram */
+.cid-line { font-size: 0.88rem; color: var(--text-muted, #52607a); }
+.type-hint {
+  margin: 0 0 14px; padding: 8px 12px; border-radius: 6px; text-align: left; font-size: 0.9rem;
+  background: var(--amber-soft, #fdf1dc); color: var(--amber-ink, #7a4a00);
+}
+.type-hint a { color: inherit; font-weight: 600; }
